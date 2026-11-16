@@ -32,7 +32,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <LinkButton href={`/billing/hotel-vouchers/${h.id}/edit`} variant="outline">Edit</LinkButton>
         </div>
       </div>
-      <article className="mx-auto grid max-w-3xl gap-5 rounded-xl border bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
+      <article className="mx-auto grid max-w-3xl gap-5 rounded-3xl bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
         <header className="flex flex-wrap justify-between gap-4 border-b pb-4">
           <div>
             <p className="text-lg font-semibold">{company?.legal_name || company?.name}</p>
@@ -51,7 +51,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           {(hotel?.address || hotel?.cities?.name) && <p className="text-neutral-600">{[hotel?.address, hotel?.cities?.name].filter(Boolean).join(', ')}</p>}
           {h.contact && <p className="text-neutral-600">{h.contact}</p>}
         </section>
-        <section className="grid gap-4 rounded-lg border p-4 sm:grid-cols-3">
+        <section className="grid gap-4 rounded-2xl bg-muted/60 p-4 sm:grid-cols-3">
           <div><p className="text-xs text-neutral-500">Check-in</p><p className="font-medium">{dt(h.check_in)}</p></div>
           <div><p className="text-xs text-neutral-500">Check-out</p><p className="font-medium">{dt(h.check_out)}</p></div>
           <div><p className="text-xs text-neutral-500">Nights</p><p className="font-medium">{nights}</p></div>

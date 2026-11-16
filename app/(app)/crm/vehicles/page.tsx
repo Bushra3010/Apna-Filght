@@ -50,7 +50,7 @@ export default async function VehiclesPage() {
             </form>
           </div>
         ))}
-        <div className="mt-2 rounded-xl border border-dashed p-3">{row({}, true)}</div>
+        <div className="mt-2 rounded-3xl border border-dashed border-border p-3">{row({}, true)}</div>
       </div>
     </>
   )

@@ -32,12 +32,12 @@ export default async function PurchaseRegisterPage({ searchParams }: { searchPar
       <PeriodForm from={from} to={to} min={fy.starts_on} max={fy.ends_on} />
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[['Payable to suppliers', tot.total], ['Taxable', tot.taxable], ['Input GST', tot.igst + tot.cgst + tot.sgst], ['Commission earned', tot.commission]].map(([l, v]) => (
-          <div key={l as string} className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">{l}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(v as number)}</p></div>
+          <div key={l as string} className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">{l}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(v as number)}</p></div>
         ))}
       </div>
       {rows.length ? (
         <>
-          <section className="mb-6 max-w-2xl overflow-x-auto rounded-xl border">
+          <section className="mb-6 max-w-2xl overflow-x-auto rounded-3xl bg-card">
             <h2 className="border-b px-3 py-2 text-sm font-semibold">By supplier</h2>
             <table className="w-full text-sm">
               <thead className="text-xs text-muted-foreground"><tr><th className="px-3 py-1.5 text-left font-medium">Supplier</th><th className="px-3 py-1.5 text-right font-medium">Documents</th><th className="px-3 py-1.5 text-right font-medium">GST</th><th className="px-3 py-1.5 text-right font-medium">Payable</th></tr></thead>
@@ -46,7 +46,7 @@ export default async function PurchaseRegisterPage({ searchParams }: { searchPar
               ))}</tbody>
             </table>
           </section>
-          <div className="overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-3xl bg-card">
             <table id="purchases" className="w-full text-sm">
               <thead className="border-b text-xs text-muted-foreground">
                 <tr>{['Date', 'Document', 'Supplier', 'Supplier bill', 'Taxable', 'IGST', 'CGST', 'SGST', 'TDS', 'Commission', 'Payable'].map((h, i) => <th key={h} className={`px-3 py-2 font-medium ${i > 3 ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr>

@@ -32,17 +32,17 @@ export default async function LedgersPage({ searchParams }: { searchParams: Prom
       />
       <form className="mb-4 flex flex-wrap gap-2">
         <Input name="q" defaultValue={q} placeholder="Search by name" className="max-w-xs" />
-        <select name="kind" defaultValue={kind} className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm">
+        <select name="kind" defaultValue={kind} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
           <option value="">Your ledgers</option>
           {LEDGER_KINDS.map(([v, l]) => (
             <option key={v} value={v}>{l}</option>
           ))}
           <option value="tax">Tax (system)</option>
         </select>
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Filter</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Filter</button>
       </form>
       {ledgers?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

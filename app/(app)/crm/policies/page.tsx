@@ -32,7 +32,7 @@ export default async function PoliciesPage() {
       <PageHeader title="Policies" description="Terms, cancellation and payment policies to include in quotations" />
       <div className="grid max-w-3xl gap-4">
         {rows?.map((p) => (
-          <div key={p.id} className="relative rounded-xl border p-4">
+          <div key={p.id} className="relative rounded-3xl bg-card p-5">
             {form(p, false)}
             <form action={deleteRow} className="absolute top-3 right-3">
               <input type="hidden" name="table" value="policies" /><input type="hidden" name="id" value={p.id} /><input type="hidden" name="back" value="/crm/policies" />
@@ -40,7 +40,7 @@ export default async function PoliciesPage() {
             </form>
           </div>
         ))}
-        <div className="rounded-xl border border-dashed p-4">{form({}, true)}</div>
+        <div className="rounded-3xl border border-dashed border-border p-4">{form({}, true)}</div>
       </div>
     </>
   )

@@ -48,17 +48,17 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
         <label className="grid gap-1 text-xs text-muted-foreground">To<Input type="date" name="to" defaultValue={to} /></label>
         <label className="grid gap-1 text-xs text-muted-foreground">
           Payment
-          <select name="pay" defaultValue={sp.pay ?? ''} className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground">
+          <select name="pay" defaultValue={sp.pay ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm text-foreground">
             <option value="">All</option>
             <option value="unpaid">Unpaid</option>
             <option value="partial">Partial</option>
             <option value="paid">Paid</option>
           </select>
         </label>
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Filter</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Filter</button>
       </form>
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

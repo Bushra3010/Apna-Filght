@@ -16,11 +16,11 @@ export default async function YearsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader title="Financial years" description="Switch the year you are working in, start a new year, and close the old one" actions={<form action={createNextYear}><Button type="submit">Create next year</Button></form>} />
-      {sp.ok && <p className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm">{sp.ok}</p>}
-      {sp.error && <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{sp.error}</p>}
+      {sp.ok && <p className="mb-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm">{sp.ok}</p>}
+      {sp.error && <p className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{sp.error}</p>}
       <div className="grid max-w-3xl gap-3">
         {sorted.map((y) => (
-          <section key={y.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
+          <section key={y.id} className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-card p-5">
             <div>
               <p className="flex items-center gap-2 font-medium">
                 FY {y.label}
@@ -46,7 +46,7 @@ export default async function YearsPage({ searchParams }: { searchParams: Promis
           </section>
         ))}
       </div>
-      <div className="mt-6 max-w-3xl rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
+      <div className="mt-6 max-w-3xl rounded-3xl bg-card/60 p-4 text-sm text-muted-foreground">
         <p className="mb-1 font-medium text-foreground">How year-end works</p>
         <ol className="list-decimal space-y-1 pl-5">
           <li>Create next year in April so you can start billing in it; keep finishing entries in the old year.</li>

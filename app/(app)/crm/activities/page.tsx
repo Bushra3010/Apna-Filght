@@ -24,7 +24,7 @@ export default async function ActivitiesPage() {
   return (
     <>
       <PageHeader title="Activity rates" description="Sightseeing and experiences you add to quotations" />
-      <ActionForm action={addActivityRate} className="mb-6 grid gap-3 rounded-xl border p-4 sm:grid-cols-3 lg:grid-cols-5">
+      <ActionForm action={addActivityRate} className="mb-6 grid gap-3 rounded-3xl bg-card p-5 sm:grid-cols-3 lg:grid-cols-5">
         <p className="col-span-full text-sm font-medium">
           Add a rate {!activities.length && <span className="font-normal text-muted-foreground">— first add activity names under <Link href="/masters/lists?kind=activity" className="underline">Lists → Activities</Link></span>}
         </p>
@@ -43,7 +43,7 @@ export default async function ActivitiesPage() {
         <div className="flex items-end"><SubmitButton>Add rate</SubmitButton></div>
       </ActionForm>
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Activity</TableHead><TableHead>City</TableHead><TableHead>Location</TableHead><TableHead>Unit</TableHead><TableHead>Timing</TableHead><TableHead className="text-right">Sell</TableHead><TableHead className="text-right">Cost</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>

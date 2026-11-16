@@ -56,7 +56,7 @@ export function PurchaseForm({
   return (
     <form action={action} className="grid max-w-5xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify(d)} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-3">
         <Field label="Supplier" htmlFor="supplier" required className="sm:col-span-2 lg:col-span-1">
           <div className="flex gap-2">
             <NativeSelect
@@ -94,7 +94,7 @@ export function PurchaseForm({
         </Field>
       </section>
 
-      <section className="grid gap-2 rounded-xl border p-4">
+      <section className="grid gap-2 rounded-3xl bg-card p-5">
         <div className="hidden grid-cols-[1fr_1fr_140px_90px_120px_32px] gap-2 text-xs font-medium text-muted-foreground lg:grid">
           <span>Expense account</span><span>Description</span><span className="text-right">Amount (ex GST)</span><span>GST</span><span className="text-right">Total</span><span />
         </div>
@@ -127,7 +127,7 @@ export function PurchaseForm({
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-xl border p-4 lg:grid-cols-[1fr_320px]">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 lg:grid-cols-[1fr_320px]">
         <div className="grid content-start gap-4">
           <Field label="TDS deducted by you (₹)" htmlFor="tds" hint="e.g. 10% on rent or professional fees; reduces what you pay the supplier">
             <Input id="tds" inputMode="decimal" className="max-w-48 text-right tabular-nums" value={d.tds} onChange={(e) => set('tds', e.target.value)} />

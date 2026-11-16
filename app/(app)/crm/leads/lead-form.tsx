@@ -54,7 +54,7 @@ export function LeadForm({
     <form action={action} className="grid max-w-4xl gap-6">
       <input type="hidden" name="id" value={lead.id ?? ''} />
 
-      <section className="grid gap-4 rounded-xl border p-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5">
         <h2 className="text-sm font-medium">Guest & contact</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Guest name" htmlFor="guest_name" required>
@@ -77,7 +77,7 @@ export function LeadForm({
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-xl border p-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5">
         <h2 className="text-sm font-medium">Travel requirements</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Starting from" htmlFor="start_place">
@@ -95,7 +95,7 @@ export function LeadForm({
           <legend className="mb-2 text-sm font-medium">Services interested in</legend>
           <div className="flex flex-wrap gap-2">
             {LEAD_SERVICES.map(([v, l]) => (
-              <label key={v} className="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1 text-sm has-checked:border-primary has-checked:bg-primary/10">
+              <label key={v} className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm has-checked:border-primary has-checked:bg-primary/10">
                 <input type="checkbox" name="services" value={v} defaultChecked={lead.services?.includes(v)} className="size-3.5" />
                 {l}
               </label>
@@ -122,7 +122,7 @@ export function LeadForm({
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-xl border p-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5">
         <h2 className="text-sm font-medium">Enquiry</h2>
         <div className="grid gap-4 sm:grid-cols-5">
           <Field label="Assigned to" htmlFor="assigned_to">
@@ -160,7 +160,7 @@ export function LeadForm({
         </Field>
       </section>
 
-      <section className="grid gap-4 rounded-xl border p-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5">
         <h2 className="text-sm font-medium">
           {isNew ? 'Next follow-up' : 'Schedule another follow-up'}
           {isNew && <span className="text-destructive">*</span>}

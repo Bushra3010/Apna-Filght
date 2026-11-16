@@ -36,10 +36,10 @@ export default async function PassengersPage({ searchParams }: { searchParams: P
       <PageHeader title="Passengers" description="Names auto-suggest on invoices" actions={<LinkButton href="/masters/passengers/new">New passenger</LinkButton>} />
       <form className="mb-4 flex gap-2">
         <Input name="q" defaultValue={q} placeholder="Name, mobile or passport" className="max-w-xs" />
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Search</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Search</button>
       </form>
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

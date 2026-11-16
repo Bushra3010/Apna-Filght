@@ -18,10 +18,10 @@ export default async function HotelsPage({ searchParams }: { searchParams: Promi
       <PageHeader title="Hotels" description="Hotels and their room rates, used to price quotations" actions={<LinkButton href="/crm/hotels/new">New hotel</LinkButton>} />
       <form className="mb-4 flex gap-2">
         <Input name="q" defaultValue={q} placeholder="Search hotels" className="max-w-xs" />
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Search</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Search</button>
       </form>
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Hotel</TableHead><TableHead>City</TableHead><TableHead>Stars</TableHead><TableHead>Contact</TableHead><TableHead className="text-right">Rates</TableHead></TableRow></TableHeader>
             <TableBody>

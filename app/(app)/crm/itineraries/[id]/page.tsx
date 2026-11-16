@@ -19,7 +19,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   return (
     <>
       <PageHeader title={it.title} description={`${it.nights} nights / ${it.nights + 1} days`} actions={<LinkButton href={`/crm/quotations/new?itinerary=${it.id}`}>Quote this</LinkButton>} />
-      {saved && <p className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm">Itinerary saved.</p>}
+      {saved && <p className="mb-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm">Itinerary saved.</p>}
       <ItineraryForm
         draft={{
           id: it.id, title: it.title, route_id: it.route_id ?? '', package_title_id: it.package_title_id ?? '', nights: String(it.nights), overview: it.overview ?? '',

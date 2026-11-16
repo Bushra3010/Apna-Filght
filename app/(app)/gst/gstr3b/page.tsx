@@ -31,7 +31,7 @@ export default async function Gstr3bPage({ searchParams }: { searchParams: Promi
       <PageHeader title="GSTR-3B summary" description={`${p.label} · figures to enter on the GST portal`} actions={<PrintButton />} />
       <GstNav current="gstr3b" month={p.month} />
       <div className="grid max-w-4xl gap-6">
-        <section className="overflow-x-auto rounded-xl border">
+        <section className="overflow-x-auto rounded-3xl bg-card">
           <h2 className="border-b px-3 py-2 text-sm font-semibold">3.1 Outward supplies</h2>
           <table className="w-full text-sm">
             {head}
@@ -42,7 +42,7 @@ export default async function Gstr3bPage({ searchParams }: { searchParams: Promi
           </table>
         </section>
         {b.interB2c.length > 0 && (
-          <section className="overflow-x-auto rounded-xl border">
+          <section className="overflow-x-auto rounded-3xl bg-card">
             <h2 className="border-b px-3 py-2 text-sm font-semibold">3.2 Inter-state supplies to unregistered persons</h2>
             <table className="w-full text-sm">
               <thead className="border-b text-xs text-muted-foreground"><tr><th className="px-3 py-2 text-left font-medium">Place of supply</th><th className="px-3 py-2 text-right font-medium">Taxable value</th><th className="px-3 py-2 text-right font-medium">IGST</th></tr></thead>
@@ -50,11 +50,11 @@ export default async function Gstr3bPage({ searchParams }: { searchParams: Promi
             </table>
           </section>
         )}
-        <section className="overflow-x-auto rounded-xl border">
+        <section className="overflow-x-auto rounded-3xl bg-card">
           <h2 className="border-b px-3 py-2 text-sm font-semibold">4 Eligible ITC — (A)(5) all other ITC</h2>
           <table className="w-full text-sm">{head}<tbody>{row('Input tax on purchases', b.itc)}</tbody></table>
         </section>
-        <section className="overflow-x-auto rounded-xl border">
+        <section className="overflow-x-auto rounded-3xl bg-card">
           <h2 className="border-b px-3 py-2 text-sm font-semibold">Tax payable (before cross-utilisation)</h2>
           <table className="w-full text-sm">
             {head}

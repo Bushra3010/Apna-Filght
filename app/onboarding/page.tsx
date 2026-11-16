@@ -22,10 +22,10 @@ export default async function OnboardingPage() {
   const y = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-muted/40 px-4 py-10">
-      <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-2 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+    <main className="flex min-h-svh items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md rounded-3xl bg-card p-8">
+        <div className="mb-4 flex items-center gap-3 text-2xl font-bold tracking-tight">
+          <span className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
             <Plane className="size-4" />
           </span>
           Set up your company

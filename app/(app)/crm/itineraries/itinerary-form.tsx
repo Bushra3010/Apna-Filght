@@ -39,7 +39,7 @@ export function ItineraryForm({ draft: initial, routes, titles, cities }: { draf
   return (
     <form action={action} className="grid max-w-4xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify(d)} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2">
         <Field label="Title" htmlFor="title" required className="sm:col-span-2">
           <Input id="title" value={d.title} onChange={(e) => set('title', e.target.value)} placeholder="Himachal 4 nights / 5 days" />
         </Field>
@@ -66,7 +66,7 @@ export function ItineraryForm({ draft: initial, routes, titles, cities }: { draf
       <section className="grid gap-3">
         <h2 className="font-medium">Day-wise plan</h2>
         {d.days.map((day, i) => (
-          <div key={i} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-[70px_1fr_200px_auto]">
+          <div key={i} className="grid gap-3 rounded-3xl bg-card p-5 sm:grid-cols-[70px_1fr_200px_auto]">
             <span className="pt-1.5 text-sm font-medium">Day {i + 1}</span>
             <Input aria-label={`Day ${i + 1} title`} placeholder="Arrive Shimla, check in" value={day.title} onChange={(e) => setDay(i, { title: e.target.value })} />
             <NativeSelect aria-label={`Day ${i + 1} city`} value={day.city_id} onChange={(e) => setDay(i, { city_id: e.target.value })}>

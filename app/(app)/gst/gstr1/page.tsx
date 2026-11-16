@@ -49,7 +49,7 @@ function Section({ title, hint, id, count, children }: { title: string; hint: st
         <div><h2 className="font-medium">{title} <span className="text-muted-foreground">({count})</span></h2><p className="text-xs text-muted-foreground">{hint}</p></div>
         {count > 0 && <CsvButton tableId={id} filename={id} />}
       </div>
-      {count > 0 ? <div className="overflow-x-auto rounded-xl border">{children}</div> : <p className="text-sm text-muted-foreground">None.</p>}
+      {count > 0 ? <div className="overflow-x-auto rounded-3xl bg-card">{children}</div> : <p className="text-sm text-muted-foreground">None.</p>}
     </section>
   )
 }
@@ -72,19 +72,19 @@ export default async function Gstr1Page({ searchParams }: { searchParams: Promis
       />
       <GstNav current="gstr1" month={p.month} />
       {!gstin && (
-        <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           Add your GSTIN under <Link href="/settings/company" className="underline">Settings → Company</Link> to download the JSON.
         </p>
       )}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {cards.map(([label, t, c]) => (
-          <div key={label} className="rounded-xl border p-4">
+          <div key={label} className="rounded-3xl bg-card p-5">
             <p className="text-xs text-muted-foreground">{label} · {c}</p>
             <p className="text-lg font-semibold tabular-nums">{formatAmount(t.taxable)}</p>
             <p className="text-xs text-muted-foreground tabular-nums">tax {formatAmount(t.igst + t.cgst + t.sgst)}</p>
           </div>
         ))}
-        <div className="rounded-xl border p-4">
+        <div className="rounded-3xl bg-card p-5">
           <p className="text-xs text-muted-foreground">Net tax liability</p>
           <p className="text-lg font-semibold tabular-nums">{formatAmount(g.net.igst + g.net.cgst + g.net.sgst)}</p>
           <p className="text-xs text-muted-foreground tabular-nums">on {formatAmount(g.net.taxable)}</p>

@@ -22,7 +22,7 @@ export default async function CreditNotesPage() {
     <>
       <PageHeader title="Credit notes" description={`Cancellations and refunds · FY ${fy.label}. Start one from an invoice with “Cancel / refund”.`} />
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

@@ -22,7 +22,7 @@ export default async function ProformasPage() {
     <>
       <PageHeader title="Proforma invoices" description={`Advance bills that become invoices when the booking is confirmed · FY ${fy.label}`} actions={<LinkButton href="/billing/proformas/new">New proforma</LinkButton>} />
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Proforma</TableHead><TableHead>Date</TableHead><TableHead>Client</TableHead><TableHead>Type</TableHead><TableHead>Quotation</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
             <TableBody>

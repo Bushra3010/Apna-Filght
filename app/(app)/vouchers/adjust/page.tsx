@@ -17,7 +17,7 @@ export default async function AdjustPage() {
     <>
       <PageHeader title="Bill adjustment" description="Receipts and payments kept on account — match them to bills so ageing and invoice status are right" />
       {relevant.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Voucher</TableHead><TableHead>Date</TableHead><TableHead>Party</TableHead><TableHead className="text-right">Amount</TableHead><TableHead className="text-right">Not adjusted</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>

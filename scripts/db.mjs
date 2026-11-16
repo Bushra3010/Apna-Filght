@@ -20,10 +20,51 @@ function loadEnv() {
 }
 loadEnv()
 
-const url = process.env.SUPABASE_DB_URL
-if (!url || url.includes('[YOUR-PASSWORD]') || url.includes('your-')) {
-  console.error('Set SUPABASE_DB_URL in .env.local (Supabase → Connect → Session pooler connection string, with your database password).')
+/** Read a line from the terminal without echoing it. */
+async function askHidden(question) {
+  const { stdin, stdout } = process
+  stdout.write(question)
+  stdin.setRawMode(true)
+  stdin.resume()
+  stdin.setEncoding('utf8')
+  let value = ''
+  return new Promise((resolve) => {
+    const onData = (ch) => {
+      if (ch === '\r' || ch === '\n' || ch === '\u0004') {
+        stdin.setRawMode(false)
+        stdin.pause()
+        stdin.off('data', onData)
+        stdout.write('\n')
+        resolve(value)
+      } else if (ch === '\u0003') {
+        stdout.write('\n')
+        process.exit(130)
+      } else if (ch === '\u007f' || ch === '\b') {
+        value = value.slice(0, -1)
+      } else {
+        value += ch
+      }
+    }
+    stdin.on('data', onData)
+  })
+}
+
+let url = process.env.SUPABASE_DB_URL
+if (!url || url.includes('your-project-ref')) {
+  console.error('Set SUPABASE_DB_URL in .env.local (Supabase → Connect → Session pooler connection string).')
   process.exit(1)
+}
+if (url.includes('[YOUR-PASSWORD]')) {
+  if (!process.stdin.isTTY) {
+    console.error('SUPABASE_DB_URL still has [YOUR-PASSWORD]. Put the password in .env.local, or run this command in a terminal to be asked for it.')
+    process.exit(1)
+  }
+  const pw = await askHidden('Supabase database password (typing is hidden): ')
+  if (!pw) {
+    console.error('No password entered.')
+    process.exit(1)
+  }
+  url = url.replace('[YOUR-PASSWORD]', encodeURIComponent(pw))
 }
 
 // Supabase requires TLS. Certificate verification is skipped because the

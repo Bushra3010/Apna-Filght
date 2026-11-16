@@ -19,7 +19,7 @@ export function StatementSide({
   to: string
 }) {
   return (
-    <section className="flex flex-col rounded-xl border">
+    <section className="flex flex-col rounded-3xl bg-card">
       <h2 className="border-b px-4 py-2 text-sm font-semibold">{title}</h2>
       <div className="flex-1 divide-y">
         {sections.map((s) => (

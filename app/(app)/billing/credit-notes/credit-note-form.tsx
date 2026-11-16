@@ -103,7 +103,7 @@ export function CreditNoteForm({
       <input type="hidden" name="payload" value={JSON.stringify({ invoice_id: invoiceId, date, notes, charges, charges_rate: rate, lines: rows })} />
 
       {lines.map((l, i) => (
-        <section key={l.id} className="grid gap-3 rounded-xl border p-4">
+        <section key={l.id} className="grid gap-3 rounded-3xl bg-card p-5">
           <label className="flex items-start gap-2">
             <input type="checkbox" className="mt-1 size-4" checked={rows[i].include} onChange={(e) => setRow(i, { include: e.target.checked })} />
             <span>
@@ -120,7 +120,7 @@ export function CreditNoteForm({
                 {l.other_charges > 0 && money(i, 'other_charges', 'Refund other charges', l.other_charges)}
               </div>
               {l.has_supplier && (
-                <div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/40 p-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 rounded-2xl bg-muted/60 p-4 sm:grid-cols-4">
                   {money(i, 'purchase_refund', 'Supplier refunds', l.purchase_gross)}
                   {l.commission > 0 && money(i, 'commission', 'Commission reversed', l.commission)}
                   {l.tds > 0 && money(i, 'tds', 'TDS reversed', l.tds)}
@@ -131,7 +131,7 @@ export function CreditNoteForm({
         </section>
       ))}
 
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Credit note date" htmlFor="date" required>
           <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </Field>

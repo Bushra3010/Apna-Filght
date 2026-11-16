@@ -27,9 +27,9 @@ export default async function ReceiptsPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHeader title="Receipts" description={`FY ${fy.label}`} actions={<LinkButton href="/vouchers/receipts/new">New receipt</LinkButton>} />
-      {saved && <p className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm">Receipt saved and posted to the accounts.</p>}
+      {saved && <p className="mb-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm">Receipt saved and posted to the accounts.</p>}
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

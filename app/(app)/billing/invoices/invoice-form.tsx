@@ -137,7 +137,7 @@ export function InvoiceForm({
         ))}
       </datalist>
 
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
         <Field label={isPf ? 'Proforma type' : 'Invoice type'} htmlFor="bill_type" required>
           <NativeSelect id="bill_type" value={draft.bill_type} onChange={(e) => changeType(e.target.value as BillType)} disabled={!!draft.id}>
             {BILL_TYPE_KEYS.map((v) => (
@@ -191,7 +191,7 @@ export function InvoiceForm({
       {draft.lines.map((l, i) => {
         const c = computed[i]
         return (
-          <section key={i} className="grid gap-4 rounded-xl border p-4">
+          <section key={i} className="grid gap-4 rounded-3xl bg-card p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <h2 className="text-sm font-medium">Line {i + 1}</h2>
@@ -204,7 +204,7 @@ export function InvoiceForm({
                         role="radio"
                         aria-checked={l.service === s}
                         onClick={() => setLine(i, { service: s })}
-                        className={cn('rounded-md border px-2 py-0.5 text-xs', l.service === s && 'border-primary bg-primary/10')}
+                        className={cn('rounded-full border border-border px-2.5 py-1 text-xs', l.service === s && 'border-primary bg-primary/10')}
                       >
                         {SERVICE_LABEL[s]}
                       </button>
@@ -274,7 +274,7 @@ export function InvoiceForm({
               ))}
             </div>
 
-            <div className="grid gap-3 rounded-lg bg-muted/40 p-3">
+            <div className="grid gap-3 rounded-2xl bg-muted/60 p-4">
               <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Sale to client (₹)</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
                 {money(i, 'basic', cfg.amounts.basic)}
@@ -303,7 +303,7 @@ export function InvoiceForm({
             </div>
 
             {cfg.purchase && (
-              <div className="grid gap-3 rounded-lg bg-muted/40 p-3">
+              <div className="grid gap-3 rounded-2xl bg-muted/60 p-4">
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Purchase from supplier (₹)</p>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
                   <Field label="Supplier" htmlFor={`sup-${i}`} className="col-span-2">
@@ -351,7 +351,7 @@ export function InvoiceForm({
         </Button>
       </div>
 
-      <section className="grid gap-4 rounded-xl border p-4 lg:grid-cols-[1fr_320px]">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 lg:grid-cols-[1fr_320px]">
         <Field label={`Notes (printed on ${docLabel})`} htmlFor="notes">
           <Textarea id="notes" rows={3} value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
         </Field>

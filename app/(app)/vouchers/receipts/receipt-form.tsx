@@ -68,7 +68,7 @@ export function ReceiptForm({
   return (
     <form action={action} className="grid max-w-4xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify(payload)} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-3">
         <Field label="Received from" htmlFor="party" required>
           <NativeSelect id="party" value={r.party_ledger_id} onChange={(e) => { set('party_ledger_id', e.target.value); setAlloc({}) }} required>
             <option value="">Select client</option>
@@ -121,7 +121,7 @@ export function ReceiptForm({
       </section>
 
       {r.party_ledger_id && (
-        <section className="grid gap-3 rounded-xl border p-4">
+        <section className="grid gap-3 rounded-3xl bg-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Adjust against invoices</h2>
             {partyOpen.length > 0 && (

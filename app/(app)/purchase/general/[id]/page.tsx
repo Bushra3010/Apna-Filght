@@ -30,7 +30,7 @@ export default async function PurchaseBillPage({ params }: { params: Promise<{ i
           {due > 0 && <LinkButton href={`/vouchers/payments/new?party=${b.supplier_ledger_id}&bill=${b.id}`}>Pay {formatINR(due)}</LinkButton>}
         </div>
       </div>
-      <div className="grid max-w-4xl gap-4 rounded-xl border p-6 text-sm">
+      <div className="grid max-w-4xl gap-4 rounded-3xl bg-card p-6 text-sm">
         <div className="grid gap-4 sm:grid-cols-3">
           <div><p className="text-xs text-muted-foreground">Supplier</p><p className="font-medium">{supplier.name}</p>{supplier.gstin && <p className="font-mono text-xs">{supplier.gstin}</p>}</div>
           <div><p className="text-xs text-muted-foreground">Bill date</p><p>{new Date(b.bill_date).toLocaleDateString('en-IN')}</p></div>

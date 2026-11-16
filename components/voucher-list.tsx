@@ -27,8 +27,8 @@ export async function VoucherList({ kind, saved }: { kind: 'payment' | 'contra' 
 
   return (
     <>
-      {saved && <p className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm">Saved and posted to the accounts.</p>}
-      <div className="overflow-x-auto rounded-xl border">
+      {saved && <p className="mb-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm">Saved and posted to the accounts.</p>}
+      <div className="overflow-x-auto rounded-3xl bg-card">
         <Table>
           <TableHeader>
             <TableRow>

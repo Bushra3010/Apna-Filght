@@ -36,7 +36,7 @@ export default async function BillsPage({ searchParams }: { searchParams: Promis
         actions={<><CsvButton tableId="bills" filename={`bills-${l.name}`} /><LinkButton href={payable ? `/vouchers/payments/new?party=${l.id}` : `/vouchers/receipts/new?party=${l.id}`}>{payable ? 'Pay' : 'Receive'}</LinkButton></>}
       />
       {bills.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <table id="bills" className="w-full text-sm">
             <thead className="border-b text-xs text-muted-foreground">
               <tr><th className="px-3 py-2 text-left font-medium">Bill</th><th className="px-3 py-2 text-left font-medium">Date</th><th className="px-3 py-2 text-left font-medium">Due</th><th className="px-3 py-2 text-right font-medium">Age (days)</th><th className="px-3 py-2 text-right font-medium">Bill amount</th><th className="px-3 py-2 text-right font-medium">Balance</th></tr>

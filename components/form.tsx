@@ -24,7 +24,7 @@ export function Field({
 }) {
   return (
     <div className={cn('grid gap-1.5', className)}>
-      <Label htmlFor={htmlFor}>
+      <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
         {label}
         {required && <span className="text-destructive">*</span>}
       </Label>
@@ -39,7 +39,7 @@ export function NativeSelect({ className, ...props }: React.ComponentProps<'sele
   return (
     <select
       className={cn(
-        'h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 dark:bg-input/30',
+        'h-10 w-full min-w-0 rounded-xl border border-input bg-muted px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 dark:bg-input/30',
         className,
       )}
       {...props}
@@ -59,7 +59,7 @@ export function SubmitButton({ children, className }: { children: React.ReactNod
 export function FormError({ state }: { state: FormState }) {
   if (!state?.error) return null
   return (
-    <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+    <p role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
       {state.error}
     </p>
   )

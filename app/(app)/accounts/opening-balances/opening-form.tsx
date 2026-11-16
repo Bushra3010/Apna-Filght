@@ -18,7 +18,7 @@ export function OpeningForm({ ledgers, locked }: { ledgers: L[]; locked: boolean
 
   return (
     <form action={action} className="grid gap-4">
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-3xl bg-card">
         <table className="w-full text-sm">
           <thead className="border-b text-xs text-muted-foreground">
             <tr><th className="px-3 py-2 text-left font-medium">Account</th><th className="w-40 px-3 py-2 text-right font-medium">Debit (₹)</th><th className="w-40 px-3 py-2 text-right font-medium">Credit (₹)</th></tr>

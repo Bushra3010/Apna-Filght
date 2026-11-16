@@ -49,15 +49,15 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       <PageHeader title="Leads" description="Travel enquiries and follow-ups" actions={<LinkButton href="/crm/leads/new">New lead</LinkButton>} />
 
       <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link href={href({ status: undefined })} className={cn('rounded-lg border px-2.5 py-1 text-sm', !sp.status && 'border-primary bg-primary/10')}>
+        <Link href={href({ status: undefined })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', !sp.status && 'border-primary bg-primary/10')}>
           All <span className="text-muted-foreground">{all?.length ?? 0}</span>
         </Link>
         {LEAD_STATUSES.map(([v, l]) => (
-          <Link key={v} href={href({ status: v })} className={cn('rounded-lg border px-2.5 py-1 text-sm', sp.status === v && 'border-primary bg-primary/10')}>
+          <Link key={v} href={href({ status: v })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', sp.status === v && 'border-primary bg-primary/10')}>
             {l} <span className="text-muted-foreground">{counts.get(v) ?? 0}</span>
           </Link>
         ))}
-        <Link href={href({ due: sp.due ? undefined : 'today' })} className={cn('rounded-lg border px-2.5 py-1 text-sm', sp.due && 'border-primary bg-primary/10')}>
+        <Link href={href({ due: sp.due ? undefined : 'today' })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', sp.due && 'border-primary bg-primary/10')}>
           Follow-up due
         </Link>
       </div>
@@ -65,19 +65,19 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       <form className="mb-4 flex flex-wrap gap-2">
         {sp.status && <input type="hidden" name="status" value={sp.status} />}
         <Input name="q" defaultValue={sp.q} placeholder="Name, phone or lead no." className="max-w-xs" />
-        <select name="service" defaultValue={sp.service ?? ''} className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm">
+        <select name="service" defaultValue={sp.service ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
           <option value="">All services</option>
           {LEAD_SERVICES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
-        <select name="source" defaultValue={sp.source ?? ''} className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm">
+        <select name="source" defaultValue={sp.source ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
           <option value="">All sources</option>
           {LEAD_SOURCES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Filter</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Filter</button>
       </form>
 
       {leads?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

@@ -109,7 +109,7 @@ export function QuotationForm(props: Props) {
     <form action={action} className="grid gap-6">
       <input type="hidden" name="payload" value={JSON.stringify(d)} />
 
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Client name" htmlFor="client_name" required className="sm:col-span-2">
           <Input id="client_name" value={d.client_name} onChange={(e) => set('client_name', e.target.value)} />
         </Field>
@@ -166,11 +166,11 @@ export function QuotationForm(props: Props) {
       </section>
 
       {/* -------- add items */}
-      <section className="grid gap-3 rounded-xl border p-4">
+      <section className="grid gap-3 rounded-3xl bg-card p-5">
         <div className="flex flex-wrap items-center gap-1" role="tablist" aria-label="Add item">
           {(['hotel', 'activity', 'vehicle', 'other'] as const).map((k) => (
             <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-              className={cn('rounded-lg border px-3 py-1 text-sm', tab === k && 'border-primary bg-primary/10 font-medium')}>
+              className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', tab === k && 'border-primary bg-primary/10 font-medium')}>
               Add {KIND_LABEL[k].toLowerCase()}
             </button>
           ))}
@@ -221,7 +221,7 @@ export function QuotationForm(props: Props) {
       </section>
 
       {/* -------- items */}
-      <section className="grid gap-2 rounded-xl border p-4">
+      <section className="grid gap-2 rounded-3xl bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-medium">Items</h2>
           <div className="flex items-center gap-2 text-sm">
@@ -253,7 +253,7 @@ export function QuotationForm(props: Props) {
         {!d.items.length && <p className="text-sm text-muted-foreground">Add hotels, activities, transport or other items above.</p>}
       </section>
 
-      <section className="grid gap-4 rounded-xl border p-4 lg:grid-cols-[1fr_320px]">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 lg:grid-cols-[1fr_320px]">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Inclusions" htmlFor="inclusions"><Textarea id="inclusions" rows={4} value={d.inclusions} onChange={(e) => set('inclusions', e.target.value)} /></Field>
           <Field label="Exclusions" htmlFor="exclusions"><Textarea id="exclusions" rows={4} value={d.exclusions} onChange={(e) => set('exclusions', e.target.value)} /></Field>
@@ -264,7 +264,7 @@ export function QuotationForm(props: Props) {
             <div className="flex flex-wrap gap-1.5 sm:col-span-2">
               <span className="text-xs text-muted-foreground">Insert:</span>
               {policies.map((p) => (
-                <button key={p.id} type="button" className="rounded-md border px-2 py-0.5 text-xs hover:bg-muted"
+                <button key={p.id} type="button" className="rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
                   onClick={() => set('terms', [d.terms, `${p.name}\n${p.body}`].filter(Boolean).join('\n\n'))}>
                   {p.name}
                 </button>

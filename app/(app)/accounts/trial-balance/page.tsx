@@ -35,7 +35,7 @@ export default async function TrialBalancePage({ searchParams }: { searchParams:
       {!rows.length ? (
         <EmptyState>No balances yet.</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <table className="w-full text-sm">
             <thead className="border-b text-xs text-muted-foreground">
               <tr>

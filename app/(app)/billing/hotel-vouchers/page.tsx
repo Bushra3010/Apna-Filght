@@ -19,7 +19,7 @@ export default async function Page() {
     <>
       <PageHeader title="Hotel / cruise vouchers" description={`FY ${fy.label}`} actions={<LinkButton href="/billing/hotel-vouchers/new">New voucher</LinkButton>} />
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Voucher</TableHead><TableHead>Property</TableHead><TableHead>Guest</TableHead><TableHead>Client</TableHead><TableHead>Stay</TableHead><TableHead>Rooms</TableHead></TableRow></TableHeader>
             <TableBody>

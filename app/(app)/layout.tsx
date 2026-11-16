@@ -2,43 +2,53 @@ import Link from 'next/link'
 import { LogOut, Plane } from 'lucide-react'
 import { getContext } from '@/lib/context'
 import { signOut } from '../(auth)/actions'
-import { MobileNav, SideNav } from '@/components/shell/nav'
+import { Rail, Tabs } from '@/components/shell/nav'
 import { Button } from '@/components/ui/button'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext()
+  const initials = (ctx.member.name || ctx.user.email).replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean).slice(0, 2).map((w: string) => w[0]?.toUpperCase()).join('')
+
   return (
-    <div className="flex min-h-svh">
-      <aside className="sticky top-0 hidden h-svh print:hidden w-56 shrink-0 flex-col border-r bg-muted/30 p-3 md:flex">
-        <div className="mb-5 flex items-center gap-2 px-2 pt-1 font-semibold">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Plane className="size-3.5" />
-          </span>
-          Apna Flight
-        </div>
-        <SideNav />
+    <div className="flex min-h-svh gap-6 px-4 py-4 md:px-6 md:py-6 print:block print:p-0">
+      <aside className="sticky top-6 hidden h-[calc(100svh-3rem)] w-11 shrink-0 flex-col items-center gap-6 md:flex print:hidden">
+        <Link href="/dashboard" aria-label="Apna Flight home" className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+          <Plane className="size-5" />
+        </Link>
+        <Rail />
       </aside>
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 border-b print:hidden bg-background/95 backdrop-blur">
-          <div className="flex h-12 items-center justify-between gap-3 px-4">
-            <div className="min-w-0 truncate text-sm">
-              <span className="font-medium">{ctx.org.name}</span>
-              <Link href="/settings/years" className="ml-2 rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground hover:text-foreground">
-                FY {ctx.fy.label}{ctx.fy.is_closed && ' · closed'}
-              </Link>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="hidden sm:inline">{ctx.user.email}</span>
-              <form action={signOut}>
-                <Button variant="ghost" size="icon-sm" type="submit" aria-label="Sign out">
-                  <LogOut />
-                </Button>
-              </form>
-            </div>
+        <header className="mb-8 flex flex-wrap items-start gap-3 print:hidden">
+          <Link href="/dashboard" aria-label="Apna Flight home" className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground md:hidden">
+            <Plane className="size-5" />
+          </Link>
+          <div className="order-last min-w-0 basis-full md:order-none md:basis-auto md:flex-1">
+            <Tabs />
           </div>
-          <MobileNav />
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <span className="hidden h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium lg:flex">{ctx.org.name}</span>
+            <Link
+              href="/settings/years"
+              className="flex h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-muted-foreground hover:text-foreground"
+              title="Financial year"
+            >
+              FY {ctx.fy.label}{ctx.fy.is_closed && ' · closed'}
+            </Link>
+            <span
+              title={ctx.user.email}
+              className="flex size-11 items-center justify-center rounded-full bg-tile-purple text-sm font-bold text-white"
+            >
+              {initials || 'AF'}
+            </span>
+            <form action={signOut}>
+              <Button variant="outline" size="icon" type="submit" aria-label="Sign out" title="Sign out">
+                <LogOut />
+              </Button>
+            </form>
+          </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 print:max-w-none print:p-0">{children}</main>
+        <main className="w-full flex-1 print:max-w-none">{children}</main>
       </div>
     </div>
   )

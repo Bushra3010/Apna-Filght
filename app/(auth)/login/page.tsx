@@ -7,10 +7,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams
   return (
     <>
-      <h1 className="mb-1 text-xl font-semibold">Sign in</h1>
-      <p className="mb-5 text-sm text-muted-foreground">Leads, billing and accounts for your travel business.</p>
+      <h1 className="mb-1 text-3xl font-bold tracking-tight">Sign in</h1>
+      <p className="mb-6 text-sm text-muted-foreground">Leads, billing and accounts for your travel business.</p>
       {sp['check-email'] && (
-        <p className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm">
+        <p className="mb-4 rounded-2xl bg-primary/10 px-3 py-2 text-sm">
           Check your inbox to confirm your email, then sign in.
         </p>
       )}

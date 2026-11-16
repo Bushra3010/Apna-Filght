@@ -20,7 +20,7 @@ export function HotelVoucherForm({ v, customers, hotels }: { v: HotelVoucherDraf
     <form action={action} className="grid max-w-4xl gap-4">
       <input type="hidden" name="id" value={v.id} />
       <input type="hidden" name="invoice_id" value={v.invoice_id} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Type" htmlFor="kind">
           <NativeSelect id="kind" name="kind" defaultValue={v.kind}><option value="hotel">Hotel</option><option value="cruise">Cruise</option></NativeSelect>
         </Field>

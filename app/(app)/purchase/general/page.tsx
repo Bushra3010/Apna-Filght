@@ -27,7 +27,7 @@ export default async function PurchasesPage() {
     <>
       <PageHeader title="Purchase bills" description={`Expenses and general purchases · FY ${fy.label}`} actions={<LinkButton href="/purchase/general/new">New bill</LinkButton>} />
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

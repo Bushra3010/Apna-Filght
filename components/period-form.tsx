@@ -26,7 +26,7 @@ export function PeriodForm({
       )}
       <label className="grid gap-1 text-xs text-muted-foreground">{asOn ? 'As on' : 'To'}<Input type="date" name="to" defaultValue={to} min={min} max={max} /></label>
       {children}
-      <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Show</button>
+      <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Show</button>
     </form>
   )
 }

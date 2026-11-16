@@ -59,7 +59,7 @@ export async function Statement({
       <form className="mb-4 flex flex-wrap items-end gap-2 print:hidden">
         <label className="grid gap-1 text-xs text-muted-foreground">
           {kinds?.includes('cash') ? 'Cash account' : kinds?.includes('bank') ? 'Bank account' : 'Ledger'}
-          <select name="ledger" defaultValue={selected?.id ?? ''} className="h-8 min-w-60 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground" required>
+          <select name="ledger" defaultValue={selected?.id ?? ''} className="h-10 min-w-60 rounded-xl border border-input bg-muted px-3 text-sm text-foreground" required>
             <option value="" disabled>Select</option>
             {ledgers?.map((l) => (
               <option key={l.id} value={l.id}>{l.name}{kinds ? '' : ` (${l.kind})`}</option>
@@ -68,14 +68,14 @@ export async function Statement({
         </label>
         <label className="grid gap-1 text-xs text-muted-foreground">From<Input type="date" name="from" defaultValue={from} min={fy.starts_on} max={fy.ends_on} /></label>
         <label className="grid gap-1 text-xs text-muted-foreground">To<Input type="date" name="to" defaultValue={to} min={fy.starts_on} max={fy.ends_on} /></label>
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Show</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Show</button>
       </form>
 
       {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
       {!selected ? (
         <EmptyState>{ledgers?.length ? 'Choose an account to see its statement.' : 'No accounts of this type yet. Add one under Ledgers.'}</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

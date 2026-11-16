@@ -3,17 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  ArrowLeftRight, BookOpen, Banknote, CalendarDays, Contact, FileMinus, FileText, LayoutDashboard, List,
-  NotebookPen, Plane, Receipt, Settings, ShoppingCart, Users, Wallet, Landmark, Map as MapIcon, Hotel, Car, Route,
-  ScrollText, FileSignature, Ticket, BedDouble, Sparkles, Scale, TrendingUp, PieChart, ClipboardList, Clock,
-  Link2, FileSpreadsheet, ReceiptIndianRupee, CalendarRange, Coins,
+  ArrowLeftRight, Banknote, BarChart3, BedDouble, BookOpen, CalendarDays, CalendarRange, Car, ClipboardList, Clock,
+  Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
+  Luggage, Map as MapIcon, NotebookPen, PieChart, Plane, Receipt, ReceiptIndianRupee, Route, Scale, ScrollText,
+  Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export const NAV = [
-  { group: '', items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
+type Item = { href: string; label: string; icon: LucideIcon }
+type Section = { key: string; label: string; icon: LucideIcon; items: Item[]; bottom?: boolean }
+
+export const SECTIONS: Section[] = [
+  { key: 'home', label: 'Dashboard', icon: LayoutGrid, items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutGrid }] },
   {
-    group: 'CRM',
+    key: 'crm', label: 'CRM', icon: Contact,
     items: [
       { href: '/crm/leads', label: 'Leads', icon: Contact },
       { href: '/crm/quotations', label: 'Quotations', icon: FileSignature },
@@ -21,7 +24,7 @@ export const NAV = [
     ],
   },
   {
-    group: 'Packages',
+    key: 'packages', label: 'Packages', icon: Luggage,
     items: [
       { href: '/crm/hotels', label: 'Hotels & rates', icon: Hotel },
       { href: '/crm/activities', label: 'Activities', icon: Sparkles },
@@ -31,7 +34,7 @@ export const NAV = [
     ],
   },
   {
-    group: 'Billing',
+    key: 'billing', label: 'Billing', icon: FileText,
     items: [
       { href: '/billing/invoices', label: 'Invoices', icon: FileText },
       { href: '/billing/proformas', label: 'Proformas', icon: Ticket },
@@ -39,21 +42,21 @@ export const NAV = [
       { href: '/billing/hotel-vouchers', label: 'Hotel vouchers', icon: BedDouble },
     ],
   },
-  { group: 'Purchase', items: [{ href: '/purchase/general', label: 'Purchase bills', icon: ShoppingCart }] },
   {
-    group: 'Vouchers',
+    key: 'money', label: 'Payments', icon: Wallet,
     items: [
       { href: '/vouchers/receipts', label: 'Receipts', icon: Wallet },
       { href: '/vouchers/payments', label: 'Payments', icon: Banknote },
+      { href: '/purchase/general', label: 'Purchase bills', icon: ShoppingCart },
       { href: '/vouchers/contra', label: 'Contra', icon: ArrowLeftRight },
       { href: '/vouchers/journal', label: 'Journal', icon: NotebookPen },
       { href: '/vouchers/adjust', label: 'Bill adjustment', icon: Link2 },
     ],
   },
   {
-    group: 'Accounts',
+    key: 'accounts', label: 'Accounts', icon: BookOpen,
     items: [
-      { href: '/accounts/ledger', label: 'Ledger statement', icon: BookOpen },
+      { href: '/accounts/ledger', label: 'Ledger', icon: BookOpen },
       { href: '/accounts/cash-book', label: 'Cash book', icon: Receipt },
       { href: '/accounts/bank-book', label: 'Bank book', icon: Landmark },
       { href: '/accounts/day-book', label: 'Day book', icon: CalendarDays },
@@ -64,16 +67,18 @@ export const NAV = [
     ],
   },
   {
-    group: 'Reports',
+    key: 'reports', label: 'Reports', icon: BarChart3,
     items: [
       { href: '/reports/outstanding', label: 'Outstanding', icon: Clock },
       { href: '/reports/sales-register', label: 'Sales register', icon: ClipboardList },
       { href: '/reports/purchase-register', label: 'Purchase register', icon: FileSpreadsheet },
+      { href: '/gst/gstr1', label: 'GSTR-1', icon: ReceiptIndianRupee },
+      { href: '/gst/gstr2', label: 'GSTR-2', icon: ReceiptIndianRupee },
+      { href: '/gst/gstr3b', label: 'GSTR-3B', icon: ReceiptIndianRupee },
     ],
   },
-  { group: 'GST', items: [{ href: '/gst/gstr1', label: 'GST returns', icon: ReceiptIndianRupee }] },
   {
-    group: 'Masters',
+    key: 'masters', label: 'Masters', icon: Users,
     items: [
       { href: '/masters/ledgers', label: 'Ledgers', icon: Users },
       { href: '/masters/passengers', label: 'Passengers', icon: Plane },
@@ -81,7 +86,7 @@ export const NAV = [
     ],
   },
   {
-    group: 'Settings',
+    key: 'settings', label: 'Settings', icon: Settings, bottom: true,
     items: [
       { href: '/settings/company', label: 'Company', icon: Settings },
       { href: '/settings/years', label: 'Financial years', icon: CalendarRange },
@@ -89,45 +94,82 @@ export const NAV = [
   },
 ]
 
-export function SideNav() {
+// pages that live outside a section's tabs
+const EXTRA: Record<string, string> = { '/reports/bills': 'reports' }
+
+function activeSection(path: string) {
+  const extra = Object.entries(EXTRA).find(([p]) => path.startsWith(p))
+  if (extra) return SECTIONS.find((s) => s.key === extra[1])!
+  return SECTIONS.find((s) => s.items.some((i) => path === i.href || path.startsWith(i.href + '/') || path.startsWith(i.href + '?'))) ?? SECTIONS[0]
+}
+
+/** Slim icon rail (desktop). */
+export function Rail() {
   const path = usePathname()
+  const current = activeSection(path)
+  const link = (s: Section) => (
+    <Link
+      key={s.key}
+      href={s.items[0].href}
+      title={s.label}
+      aria-label={s.label}
+      aria-current={s.key === current.key ? 'page' : undefined}
+      className={cn(
+        'flex size-11 items-center justify-center rounded-full bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+        s.key === current.key && 'bg-secondary text-primary ring-1 ring-primary/50 hover:bg-secondary hover:text-primary',
+      )}
+    >
+      <s.icon className="size-[18px]" />
+    </Link>
+  )
   return (
-    <nav className="grid gap-3 overflow-y-auto text-sm">
-      {NAV.map((g) => (
-        <div key={g.group || 'root'} className="grid gap-0.5">
-          {g.group && <p className="px-2 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">{g.group}</p>}
-          {g.items.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted',
-                (path.startsWith(href) || (href.startsWith('/gst/') && path.startsWith('/gst/'))) && 'bg-muted font-medium text-foreground',
-              )}
-            >
-              <Icon className="size-4 text-muted-foreground" />
-              {label}
-            </Link>
-          ))}
-        </div>
-      ))}
+    <nav aria-label="Areas" className="flex flex-1 flex-col items-center gap-3">
+      {SECTIONS.filter((s) => !s.bottom).map(link)}
+      <div className="mt-auto flex flex-col items-center gap-3">{SECTIONS.filter((s) => s.bottom).map(link)}</div>
     </nav>
   )
 }
 
-export function MobileNav() {
+/** Pill tabs for the current area; on phones also a row to switch area. */
+export function Tabs() {
   const path = usePathname()
+  const current = activeSection(path)
   return (
-    <nav className="flex gap-1 overflow-x-auto px-4 pb-2 text-sm md:hidden">
-      {NAV.flatMap((g) => g.items).map(({ href, label }) => (
-        <Link
-          key={href}
-          href={href}
-          className={cn('shrink-0 rounded-lg px-2.5 py-1 hover:bg-muted', path.startsWith(href) && 'bg-muted font-medium')}
-        >
-          {label}
-        </Link>
-      ))}
-    </nav>
+    <div className="grid min-w-0 gap-2">
+      <nav aria-label="Areas" className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+        {SECTIONS.map((s) => (
+          <Link
+            key={s.key}
+            href={s.items[0].href}
+            className={cn(
+              'flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-card px-3 text-xs font-medium text-muted-foreground',
+              s.key === current.key && 'bg-secondary text-foreground',
+            )}
+          >
+            <s.icon className="size-3.5" />
+            {s.label}
+          </Link>
+        ))}
+      </nav>
+      <nav aria-label={current.label} className="-mx-1 flex gap-2 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {current.items.map(({ href, label, icon: Icon }) => {
+          const on = path === href || path.startsWith(href + '/')
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={on ? 'page' : undefined}
+              className={cn(
+                'flex h-11 shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
+                on && 'border-transparent bg-primary font-semibold text-primary-foreground hover:text-primary-foreground',
+              )}
+            >
+              <Icon className="size-4" />
+              {label}
+            </Link>
+          )
+        })}
+      </nav>
+    </div>
   )
 }

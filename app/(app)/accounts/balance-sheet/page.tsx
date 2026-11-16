@@ -24,7 +24,7 @@ export default async function BalanceSheetPage({ searchParams }: { searchParams:
         <StatementSide title="Assets" sections={bs.assets} from={fy.starts_on} to={to} total={bs.totalAssets} />
       </div>
       {bs.diff !== 0 && (
-        <p className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           Assets and liabilities differ by {formatAmount(Math.abs(bs.diff))} because the opening balances don’t balance. Fix them under Accounts → Opening balances.
         </p>
       )}

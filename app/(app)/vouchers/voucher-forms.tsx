@@ -127,7 +127,7 @@ export function PaymentForm({
   return (
     <form action={action} className="grid max-w-4xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify(payload)} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2 lg:grid-cols-3">
         <Field label="Paid to" htmlFor="party" required>
           <LedgerSelect id="party" ledgers={payees} value={v.party_ledger_id} onChange={(x) => { set('party_ledger_id', x); setAlloc({}) }} />
         </Field>
@@ -147,7 +147,7 @@ export function PaymentForm({
       </section>
 
       {docs.length > 0 && (
-        <section className="grid gap-2 rounded-xl border p-4">
+        <section className="grid gap-2 rounded-3xl bg-card p-5">
           <h2 className="text-sm font-medium">Adjust against</h2>
           {docs.map((d) => (
             <div key={d.id} className="grid grid-cols-[1fr_auto_140px] items-center gap-3 text-sm">
@@ -189,7 +189,7 @@ export function ContraForm({ ledgers, today }: { ledgers: LedgerOpt[]; today: st
   return (
     <form action={action} className="grid max-w-3xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify({ kind: 'contra', ...v })} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-2">
         <Field label="From" htmlFor="from" required hint="e.g. cash deposited into bank: From = Cash">
           <LedgerSelect id="from" ledgers={accounts} value={v.cash_bank_ledger_id} onChange={(x) => set('cash_bank_ledger_id', x)} />
         </Field>
@@ -232,7 +232,7 @@ export function JournalForm({ ledgers, today }: { ledgers: LedgerOpt[]; today: s
   return (
     <form action={action} className="grid max-w-4xl gap-6">
       <input type="hidden" name="payload" value={JSON.stringify({ kind: 'journal', voucher_date: date, narration, lines })} />
-      <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-[200px_1fr]">
+      <section className="grid gap-4 rounded-3xl bg-card p-5 sm:grid-cols-[200px_1fr]">
         <Field label="Date" htmlFor="date" required>
           <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </Field>
@@ -240,7 +240,7 @@ export function JournalForm({ ledgers, today }: { ledgers: LedgerOpt[]; today: s
           <Input id="narration" value={narration} onChange={(e) => setNarration(e.target.value)} />
         </Field>
       </section>
-      <section className="grid gap-2 rounded-xl border p-4">
+      <section className="grid gap-2 rounded-3xl bg-card p-5">
         <div className="hidden grid-cols-[1fr_130px_130px_1fr_32px] gap-2 text-xs font-medium text-muted-foreground sm:grid">
           <span>Account</span><span className="text-right">Debit</span><span className="text-right">Credit</span><span>Line note</span><span />
         </div>

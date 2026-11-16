@@ -25,8 +25,8 @@ export default async function ProfitLossPage({ searchParams }: { searchParams: P
       <PageHeader title="Profit & loss" description={`${d(from)} to ${d(to)} · FY ${fy.label}`} actions={<PrintButton />} />
       <PeriodForm from={from} to={to} min={fy.starts_on} max={fy.ends_on} />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">Gross profit</p><p className="text-lg font-semibold tabular-nums">{formatINR(pl.gross)}</p></div>
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">{pl.net >= 0 ? 'Net profit' : 'Net loss'}</p><p className={pl.net < 0 ? 'text-lg font-semibold text-destructive tabular-nums' : 'text-lg font-semibold tabular-nums'}>{formatINR(Math.abs(pl.net))}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">Gross profit</p><p className="text-lg font-semibold tabular-nums">{formatINR(pl.gross)}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">{pl.net >= 0 ? 'Net profit' : 'Net loss'}</p><p className={pl.net < 0 ? 'text-lg font-semibold text-destructive tabular-nums' : 'text-lg font-semibold tabular-nums'}>{formatINR(Math.abs(pl.net))}</p></div>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <StatementSide title="Expenses — trading" sections={pl.directExpense} from={from} to={to} total={tradingLeft}

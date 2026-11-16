@@ -56,7 +56,7 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      <div className="mb-6 grid gap-3 rounded-xl border bg-muted/30 p-4 text-sm sm:grid-cols-[1fr_auto] print:hidden">
+      <div className="mb-6 grid gap-3 rounded-3xl bg-card/60 p-4 text-sm sm:grid-cols-[1fr_auto] print:hidden">
         <dl className="flex flex-wrap gap-x-6 gap-y-1">
           <div className="flex gap-2"><dt className="text-muted-foreground">Cost</dt><dd className="tabular-nums">{formatINR(q.cost_total)}</dd></div>
           <div className="flex gap-2"><dt className="text-muted-foreground">Margin</dt><dd className="tabular-nums">{formatINR(q.markup)}{Number(q.subtotal) > 0 && ` (${Math.round((Number(q.markup) / Number(q.subtotal)) * 100)}%)`}</dd></div>
@@ -73,7 +73,7 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      <article className="mx-auto grid max-w-4xl gap-6 rounded-xl border bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
+      <article className="mx-auto grid max-w-4xl gap-6 rounded-3xl bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
         <header className="flex flex-wrap justify-between gap-6 border-b pb-4">
           <div>
             <p className="text-lg font-semibold">{company?.legal_name || company?.name}</p>
@@ -125,7 +125,7 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
           {q.inclusions && <p className="whitespace-pre-line text-neutral-700">{q.inclusions}</p>}
         </section>
 
-        <section className="grid gap-1 justify-self-end rounded-lg border p-4 sm:min-w-72">
+        <section className="grid gap-1 justify-self-end rounded-2xl bg-muted/60 p-4 sm:min-w-72">
           <div className="flex justify-between gap-6"><span>Package price</span><span className="tabular-nums">{formatINR(q.subtotal)}</span></div>
           {Number(q.tax_total) > 0 && <div className="flex justify-between gap-6"><span>GST @ {Number(q.gst_rate)}%</span><span className="tabular-nums">{formatINR(q.tax_total)}</span></div>}
           <div className="flex justify-between gap-6 border-t pt-1 text-base font-semibold"><span>Total</span><span className="tabular-nums">{formatINR(q.grand_total)}</span></div>

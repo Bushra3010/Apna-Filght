@@ -32,19 +32,19 @@ export default async function OutstandingPage({ searchParams }: { searchParams: 
       />
       <div className="mb-4 flex flex-wrap gap-1.5 print:hidden">
         {(['receivable', 'payable'] as const).map((s) => (
-          <Link key={s} href={`/reports/outstanding?side=${s}&to=${to}`} className={cn('rounded-lg border px-2.5 py-1 text-sm capitalize', side === s && 'border-primary bg-primary/10')}>{s}</Link>
+          <Link key={s} href={`/reports/outstanding?side=${s}&to=${to}`} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm capitalize', side === s && 'border-primary bg-primary/10')}>{s}</Link>
         ))}
       </div>
       <PeriodForm to={to} min={fy.starts_on} max={fy.ends_on} asOn extra={{ side }} />
       {error && <p className="mb-4 text-sm text-destructive">{error.message}</p>}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">{side === 'payable' ? 'You owe' : 'Owed to you'}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(owe)}</p></div>
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">Advances</p><p className="text-lg font-semibold tabular-nums">{formatAmount(adv)}</p></div>
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">Over 60 days</p><p className="text-lg font-semibold tabular-nums">{formatAmount(sum('d61_90') + sum('d90_plus'))}</p></div>
-        <div className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">Parties</p><p className="text-lg font-semibold tabular-nums">{rows.length}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">{side === 'payable' ? 'You owe' : 'Owed to you'}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(owe)}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">Advances</p><p className="text-lg font-semibold tabular-nums">{formatAmount(adv)}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">Over 60 days</p><p className="text-lg font-semibold tabular-nums">{formatAmount(sum('d61_90') + sum('d90_plus'))}</p></div>
+        <div className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">Parties</p><p className="text-lg font-semibold tabular-nums">{rows.length}</p></div>
       </div>
       {rows.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <table id="outstanding" className="w-full text-sm">
             <thead className="border-b text-xs text-muted-foreground">
               <tr>

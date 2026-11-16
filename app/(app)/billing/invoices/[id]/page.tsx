@@ -90,7 +90,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         </div>
       </div>
 
-      {actionError && <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive print:hidden">{actionError}</p>}
+      {actionError && <p className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive print:hidden">{actionError}</p>}
       {credits && credits.length > 0 && (
         <p className="mb-4 text-sm text-muted-foreground print:hidden">
           Credit notes:{' '}
@@ -103,7 +103,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         </p>
       )}
 
-      <article className="mx-auto max-w-4xl rounded-xl border bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
+      <article className="mx-auto max-w-4xl rounded-3xl bg-white p-8 text-sm text-neutral-900 print:max-w-none print:rounded-none print:border-0 print:p-0">
         <header className="flex flex-wrap justify-between gap-6 border-b pb-4">
           <div>
             <p className="text-lg font-semibold">{company?.legal_name || company?.name}</p>

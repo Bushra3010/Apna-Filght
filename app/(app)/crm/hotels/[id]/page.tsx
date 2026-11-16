@@ -32,12 +32,12 @@ export default async function HotelPage({ params }: { params: Promise<{ id: stri
     <>
       <PageHeader title={h.name} description="Hotel details and room rates" />
       <div className="grid gap-8">
-        <section className="rounded-xl border p-4"><HotelForm h={h as HotelRow} cities={cities} suppliers={suppliers} /></section>
+        <section className="rounded-3xl bg-card p-5"><HotelForm h={h as HotelRow} cities={cities} suppliers={suppliers} /></section>
 
         <section className="grid gap-4">
           <h2 className="font-medium">Room rates</h2>
           {rates?.length ? (
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-3xl bg-card">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -69,7 +69,7 @@ export default async function HotelPage({ params }: { params: Promise<{ id: stri
             <p className="text-sm text-muted-foreground">No rates yet.</p>
           )}
 
-          <ActionForm action={addHotelRate} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-3 lg:grid-cols-5">
+          <ActionForm action={addHotelRate} className="grid gap-3 rounded-3xl bg-card p-5 sm:grid-cols-3 lg:grid-cols-5">
             <input type="hidden" name="hotel_id" value={id} />
             <p className="col-span-full text-sm font-medium">Add a rate</p>
             <Field label="Package class" htmlFor="package_class_id">

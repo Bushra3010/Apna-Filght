@@ -29,11 +29,11 @@ export default async function DayBookPage({ searchParams }: { searchParams: Prom
       <form className="mb-4 flex flex-wrap items-end gap-2 print:hidden">
         <label className="grid gap-1 text-xs text-muted-foreground">From<Input type="date" name="from" defaultValue={from} min={fy.starts_on} max={fy.ends_on} /></label>
         <label className="grid gap-1 text-xs text-muted-foreground">To<Input type="date" name="to" defaultValue={to} min={fy.starts_on} max={fy.ends_on} /></label>
-        <button className="h-8 rounded-lg border px-3 text-sm hover:bg-muted">Show</button>
+        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Show</button>
       </form>
       {error && <p className="mb-4 text-sm text-destructive">{error.message}</p>}
       {rows.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader>
               <TableRow>

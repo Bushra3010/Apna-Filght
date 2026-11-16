@@ -28,13 +28,13 @@ export default async function QuotationsPage({ searchParams }: { searchParams: P
     <>
       <PageHeader title="Quotations" description={`Holiday package proposals · FY ${fy.label}`} actions={<LinkButton href="/crm/quotations/new">New quotation</LinkButton>} />
       <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link href="/crm/quotations" className={cn('rounded-lg border px-2.5 py-1 text-sm', !status && 'border-primary bg-primary/10')}>All</Link>
+        <Link href="/crm/quotations" className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', !status && 'border-primary bg-primary/10')}>All</Link>
         {QUOTE_STATUSES.map(([v, l]) => (
-          <Link key={v} href={`/crm/quotations?status=${v}`} className={cn('rounded-lg border px-2.5 py-1 text-sm', status === v && 'border-primary bg-primary/10')}>{l}</Link>
+          <Link key={v} href={`/crm/quotations?status=${v}`} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', status === v && 'border-primary bg-primary/10')}>{l}</Link>
         ))}
       </div>
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Quotation</TableHead><TableHead>Date</TableHead><TableHead>Client</TableHead><TableHead>Package</TableHead><TableHead>Travel</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">Margin</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
             <TableBody>

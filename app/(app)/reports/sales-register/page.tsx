@@ -60,7 +60,7 @@ export default async function SalesRegisterPage({ searchParams }: { searchParams
       <PeriodForm from={from} to={to} min={fy.starts_on} max={fy.ends_on}>
         <label className="grid gap-1 text-xs text-muted-foreground">
           Type
-          <select name="type" defaultValue={type ?? ''} className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground">
+          <select name="type" defaultValue={type ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm text-foreground">
             <option value="">All</option>
             {BILL_TYPE_KEYS.map((k) => <option key={k} value={k}>{BILL_TYPES[k].label}</option>)}
           </select>
@@ -68,13 +68,13 @@ export default async function SalesRegisterPage({ searchParams }: { searchParams
       </PeriodForm>
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {[['Net sales', sum('total')], ['Taxable value', sum('taxable')], ['GST', sum('tax')], ['Margin', sum('margin')], ['Cancellation charges', charges]].map(([l, v]) => (
-          <div key={l as string} className="rounded-xl border p-4"><p className="text-xs text-muted-foreground">{l}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(v as number)}</p></div>
+          <div key={l as string} className="rounded-3xl bg-card p-5"><p className="text-xs text-muted-foreground">{l}</p><p className="text-lg font-semibold tabular-nums">{formatAmount(v as number)}</p></div>
         ))}
       </div>
       {rows.length ? (
         <>
           <div className="mb-6 grid gap-4 lg:grid-cols-2">
-            <section className="overflow-x-auto rounded-xl border">
+            <section className="overflow-x-auto rounded-3xl bg-card">
               <h2 className="border-b px-3 py-2 text-sm font-semibold">By type</h2>
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted-foreground"><tr><th className="px-3 py-1.5 text-left font-medium">Type</th><th className="px-3 py-1.5 text-right font-medium">Invoices</th><th className="px-3 py-1.5 text-right font-medium">Sales</th><th className="px-3 py-1.5 text-right font-medium">Margin</th><th className="px-3 py-1.5 text-right font-medium">%</th></tr></thead>
@@ -83,7 +83,7 @@ export default async function SalesRegisterPage({ searchParams }: { searchParams
                 ))}</tbody>
               </table>
             </section>
-            <section className="overflow-x-auto rounded-xl border">
+            <section className="overflow-x-auto rounded-3xl bg-card">
               <h2 className="border-b px-3 py-2 text-sm font-semibold">Top clients</h2>
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted-foreground"><tr><th className="px-3 py-1.5 text-left font-medium">Client</th><th className="px-3 py-1.5 text-right font-medium">Sales</th><th className="px-3 py-1.5 text-right font-medium">Margin</th></tr></thead>
@@ -93,7 +93,7 @@ export default async function SalesRegisterPage({ searchParams }: { searchParams
               </table>
             </section>
           </div>
-          <div className="overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-3xl bg-card">
             <table id="sales" className="w-full text-sm">
               <thead className="border-b text-xs text-muted-foreground">
                 <tr>{['Date', 'Document', 'Type', 'Client', 'Taxable', 'GST', 'Total', 'Purchase', 'Margin'].map((h, i) => <th key={h} className={`px-3 py-2 font-medium ${i > 3 ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr>

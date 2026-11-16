@@ -17,7 +17,7 @@ export default async function Page() {
     <>
       <PageHeader title="Itineraries" description="Reusable day-wise plans" actions={<LinkButton href="/crm/itineraries/new">New itinerary</LinkButton>} />
       {rows?.length ? (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-3xl bg-card">
           <Table>
             <TableHeader><TableRow><TableHead>Itinerary</TableHead><TableHead>Route</TableHead><TableHead>Package</TableHead><TableHead>Duration</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>

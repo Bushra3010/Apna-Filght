@@ -23,7 +23,7 @@ export default async function OpeningBalancesPage() {
         title="Opening balances"
         description={`Balances on ${new Date(fy.starts_on).toLocaleDateString('en-IN', { dateStyle: 'medium' })} (start of FY ${fy.label}). Client and supplier balances you carry over from your old system go here too.`}
       />
-      {fy.is_closed && <p className="mb-4 rounded-lg bg-muted px-3 py-2 text-sm">This year is closed, so its opening balances are locked.</p>}
+      {fy.is_closed && <p className="mb-4 rounded-2xl bg-muted px-4 py-2 text-sm">This year is closed, so its opening balances are locked.</p>}
       <OpeningForm ledgers={rows} locked={fy.is_closed} />
     </>
   )

@@ -41,12 +41,12 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         <LeadForm lead={lead as LeadRow} parties={await getParties()} members={await getMembers()} />
 
         <aside className="grid content-start gap-4">
-          <section className="rounded-xl border p-4">
+          <section className="rounded-3xl bg-card p-5">
             <h2 className="mb-3 text-sm font-medium">Follow-ups</h2>
             {followups?.length ? (
               <ul className="grid gap-3 text-sm">
                 {followups.map((f) => (
-                  <li key={f.id} className="rounded-lg border p-2.5">
+                  <li key={f.id} className="rounded-2xl bg-muted/60 p-3">
                     <div className="flex justify-between gap-2">
                       <span className="font-medium">{label(FOLLOWUP_ACTIONS, f.action)}</span>
                       {f.done_at ? (
@@ -74,7 +74,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               <p className="text-sm text-muted-foreground">No follow-ups.</p>
             )}
           </section>
-          <section className="rounded-xl border p-4">
+          <section className="rounded-3xl bg-card p-5">
             <h2 className="mb-3 text-sm font-medium">Invoices</h2>
             {invoices?.length ? (
               <ul className="grid gap-1 text-sm">
