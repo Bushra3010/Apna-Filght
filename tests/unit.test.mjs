@@ -8,7 +8,7 @@ import path from 'node:path'
 const root = path.join(import.meta.dirname, '..')
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'apna-unit-'))
 execFileSync(path.join(root, 'node_modules/.bin/tsc'), [
-  'lib/gst.ts', 'lib/gst-returns.ts', 'lib/statements.ts', 'lib/words.ts',
+  'lib/gst.ts', 'lib/gst-returns.ts', 'lib/statements.ts', 'lib/words.ts', 'lib/next-path.ts',
   '--outDir', out, '--module', 'es2022', '--target', 'es2022', '--skipLibCheck',
 ], { cwd: root, stdio: 'inherit' })
 for (const f of fs.readdirSync(out)) fs.renameSync(path.join(out, f), path.join(out, f.replace(/\.js$/, '.mjs')))
@@ -17,6 +17,7 @@ const { computeLine } = await imp('gst.mjs')
 const { buildGstr1, gstr1Json, buildGstr3b } = await imp('gst-returns.mjs')
 const { profitAndLoss, balanceSheet } = await imp('statements.mjs')
 const { amountInWords } = await imp('words.mjs')
+const { safeNext } = await imp('next-path.mjs')
 
 let bad = 0
 const ok = (v, m) => { console.log(v ? 'PASS' : 'FAIL', m); if (!v) bad++ }
@@ -79,6 +80,10 @@ const pl = profitAndLoss(tb)
 ok(pl.gross === 300 && pl.net === 200, 'P&L: gross profit 300, net profit 200')
 const bs = balanceSheet(tb)
 ok(bs.diff === 0 && bs.totalAssets === 500 && bs.totalLiab === 500, 'balance sheet balances with profit in capital')
+
+// --- sign-in redirect only to our own pages
+ok(safeNext('/invite/abc') === '/invite/abc' && safeNext('/billing/invoices?x=1') === '/billing/invoices?x=1', 'post-login redirect keeps same-site paths')
+ok([ '//evil.com', 'https://evil.com', '/\\evil.com', 'javascript:alert(1)', '', null ].every((v) => safeNext(v) === null), 'post-login redirect refuses other sites')
 
 // --- client boundary: server files must not import non-component values from 'use client' files
 // (on the server those imports are placeholders, e.g. an array becomes something without .map)

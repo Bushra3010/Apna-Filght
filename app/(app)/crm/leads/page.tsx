@@ -11,11 +11,12 @@ import { cn } from '@/lib/utils'
 
 export const metadata = { title: 'Leads' }
 
-type SP = { status?: string; service?: string; source?: string; q?: string; due?: string }
+type SP = { status?: string; service?: string; source?: string; q?: string; due?: string; who?: string }
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams
-  const { supabase, org } = await getContext()
+  const { supabase, org, member } = await getContext()
+  const { data: team } = await supabase.from('org_members').select('id, display_name').eq('org_id', org.id).eq('is_active', true).order('display_name')
 
   let query = supabase
     .from('leads')
@@ -27,6 +28,9 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   if (sp.status) query = query.eq('status', sp.status)
   if (sp.service) query = query.contains('services', [sp.service])
   if (sp.source) query = query.eq('source', sp.source)
+  if (sp.who === 'me') query = query.eq('assigned_to', member.id)
+  else if (sp.who === 'none') query = query.is('assigned_to', null)
+  else if (sp.who) query = query.eq('assigned_to', sp.who)
   if (sp.due === 'today') query = query.lte('next_followup_at', `${todayIST()}T23:59:59+05:30`)
   if (sp.q) {
     const q = sp.q.replace(/[,()]/g, ' ')
@@ -73,6 +77,12 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         <select name="source" defaultValue={sp.source ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
           <option value="">All sources</option>
           {LEAD_SOURCES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+        <select name="who" defaultValue={sp.who ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
+          <option value="">Everyone</option>
+          <option value="me">Assigned to me</option>
+          <option value="none">Unassigned</option>
+          {team?.filter((t) => t.id !== member.id).map((t) => <option key={t.id} value={t.id}>{t.display_name}</option>)}
         </select>
         <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Filter</button>
       </form>

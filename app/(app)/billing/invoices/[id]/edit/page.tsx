@@ -39,6 +39,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         fields[f.key] = (LINE_COLUMNS as readonly string[]).includes(f.key) ? s(l[f.key]) : s(details[f.key])
       }
       return {
+        group_purchase_id: s(l.group_purchase_id),
         service: l.service,
         pax_name: s(l.pax_name),
         pax_type: l.pax_type ?? 'adult',

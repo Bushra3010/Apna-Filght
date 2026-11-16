@@ -6,7 +6,8 @@ import {
   ArrowLeftRight, Banknote, BarChart3, BedDouble, BookOpen, CalendarDays, CalendarRange, Car, ClipboardList, Clock,
   Building2, Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
   Luggage, Map as MapIcon, NotebookPen, PieChart, Plane, Receipt, ReceiptIndianRupee, Route, Scale, ScrollText,
-  Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, type LucideIcon,
+  Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, Gauge, Shuffle, Bell, UsersRound, PlaneTakeoff,
+  type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -18,9 +19,11 @@ export const SECTIONS: Section[] = [
   {
     key: 'crm', label: 'CRM', icon: Contact,
     items: [
+      { href: '/crm/dashboard', label: 'CRM dashboard', icon: Gauge },
       { href: '/crm/leads', label: 'Leads', icon: Contact },
       { href: '/crm/quotations', label: 'Quotations', icon: FileSignature },
       { href: '/crm/itineraries', label: 'Itineraries', icon: MapIcon },
+      { href: '/crm/transfer', label: 'Lead transfer', icon: Shuffle },
     ],
   },
   {
@@ -48,6 +51,7 @@ export const SECTIONS: Section[] = [
       { href: '/vouchers/receipts', label: 'Receipts', icon: Wallet },
       { href: '/vouchers/payments', label: 'Payments', icon: Banknote },
       { href: '/purchase/general', label: 'Purchase bills', icon: ShoppingCart },
+      { href: '/purchase/groups', label: 'Group / FD', icon: PlaneTakeoff },
       { href: '/vouchers/contra', label: 'Contra', icon: ArrowLeftRight },
       { href: '/vouchers/journal', label: 'Journal', icon: NotebookPen },
       { href: '/vouchers/adjust', label: 'Bill adjustment', icon: Link2 },
@@ -69,6 +73,7 @@ export const SECTIONS: Section[] = [
   {
     key: 'reports', label: 'Reports', icon: BarChart3,
     items: [
+      { href: '/reports/alerts', label: 'Alerts', icon: Bell },
       { href: '/reports/outstanding', label: 'Outstanding', icon: Clock },
       { href: '/reports/sales-register', label: 'Sales register', icon: ClipboardList },
       { href: '/reports/purchase-register', label: 'Purchase register', icon: FileSpreadsheet },
@@ -89,6 +94,7 @@ export const SECTIONS: Section[] = [
     key: 'settings', label: 'Settings', icon: Settings, bottom: true,
     items: [
       { href: '/settings/company', label: 'Company', icon: Settings },
+      { href: '/settings/team', label: 'Team', icon: UsersRound },
       { href: '/settings/companies', label: 'Companies', icon: Building2 },
       { href: '/settings/years', label: 'Financial years', icon: CalendarRange },
     ],
@@ -96,7 +102,7 @@ export const SECTIONS: Section[] = [
 ]
 
 // pages that live outside a section's tabs
-const EXTRA: Record<string, string> = { '/reports/bills': 'reports' }
+const EXTRA: Record<string, string> = { '/reports/bills': 'reports', '/vouchers/batch': 'money' }
 
 function activeSection(path: string) {
   const extra = Object.entries(EXTRA).find(([p]) => path.startsWith(p))

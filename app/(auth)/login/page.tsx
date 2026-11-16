@@ -1,9 +1,10 @@
 import { AuthForm } from '../auth-form'
 import { signIn } from '../actions'
+import { safeNext } from '@/lib/next-path'
 
 export const metadata = { title: 'Sign in' }
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ 'check-email'?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ 'check-email'?: string; next?: string }> }) {
   const sp = await searchParams
   return (
     <>
@@ -14,7 +15,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Check your inbox to confirm your email, then sign in.
         </p>
       )}
-      <AuthForm action={signIn} mode="login" />
+      <AuthForm action={signIn} mode="login" next={safeNext(sp.next) ?? undefined} />
     </>
   )
 }

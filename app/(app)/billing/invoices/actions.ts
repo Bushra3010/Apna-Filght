@@ -16,6 +16,7 @@ const optDate = z.string().refine((v) => v === '' || !Number.isNaN(Date.parse(v)
 const uuidOrEmpty = z.union([z.literal(''), z.string().uuid()])
 
 const Line = z.object({
+  group_purchase_id: uuidOrEmpty.default(''),
   service: z.enum(['flight', 'hotel', 'visa', 'insurance', 'train', 'bus', 'taxi', 'misc', 'tour', 'commission']),
   pax_name: z.string().trim(),
   pax_type: z.enum(['adult', 'child', 'infant']),
@@ -98,6 +99,8 @@ export async function saveInvoice(_: FormState, form: FormData): Promise<FormSta
       commission: cfg.purchase ? toPaise(l.commission) : 0,
       tds: cfg.purchase ? toPaise(l.tds) : 0,
     }
+    const fromGroup = l.service === 'flight' && !!l.group_purchase_id
+    if (fromGroup) Object.assign(amounts, { purchase_gross: 0, purchase_gst: 0, commission: 0, tds: 0 })
     const hasPurchase = amounts.purchase_gross || amounts.commission || amounts.tds
     if (hasPurchase && !l.supplier_ledger_id) return { error: `${at}choose the supplier for the purchase amounts` }
     if (amounts.purchase_gst > amounts.purchase_gross) return { error: `${at}input GST cannot exceed the purchase amount` }
@@ -127,7 +130,8 @@ export async function saveInvoice(_: FormState, form: FormData): Promise<FormSta
       sgst: t.sgst,
       igst: t.igst,
       net_sale: t.net_sale,
-      supplier_ledger_id: cfg.purchase ? nul(l.supplier_ledger_id) : null,
+      group_purchase_id: fromGroup ? l.group_purchase_id : null,
+      supplier_ledger_id: cfg.purchase && !fromGroup ? nul(l.supplier_ledger_id) : null,
       supplier_invoice_no: cfg.purchase ? nul(l.supplier_invoice_no) : null,
       net_purchase: t.net_purchase,
     })

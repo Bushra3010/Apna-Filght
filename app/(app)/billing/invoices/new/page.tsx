@@ -12,8 +12,8 @@ const TYPE_FOR_SERVICE: Record<string, BillType> = {
   transport: 'taxi', train_bus: 'train_bus', activities: 'misc_service', other: 'misc_service',
 }
 
-export default async function NewInvoicePage({ searchParams }: { searchParams: Promise<{ lead?: string; type?: string }> }) {
-  const { lead: leadId, type } = await searchParams
+export default async function NewInvoicePage({ searchParams }: { searchParams: Promise<{ lead?: string; type?: string; group?: string }> }) {
+  const { lead: leadId, type, group } = await searchParams
   const { supabase, org } = await getContext()
   const opts = await getInvoiceFormOptions()
 
@@ -60,6 +60,11 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: P
         fields: { travel_date: lead.travel_date ?? '', ...(bt === 'tour' ? { pax_count: String(pax) } : {}) },
       }))
     }
+  }
+
+  const g = opts.groups.find((x) => x.id === group)
+  if (g && !leadId) {
+    draft.lines = [{ ...emptyLine('domestic'), group_purchase_id: g.id, fields: { airline_id: g.airline_id ?? '', flight_no: g.flight_no ?? '', sector: g.sector ?? '', pnr: g.pnr ?? '', travel_date: g.travel_date ?? '' } }]
   }
 
   return (

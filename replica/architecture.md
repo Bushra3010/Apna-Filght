@@ -34,7 +34,7 @@ One database, one app. No microservices.
 ## 2. Data model
 
 `supabase/migrations/` — **43 tables, 2 views, posting + RPC functions**, tested on real Postgres
-(`npm run test:db`, 82 checks; `npm run test:unit`, 18 checks).
+(`npm run test:db`, 110 checks; `npm run test:unit`, 23 checks).
 
 | Area | Tables |
 |---|---|
@@ -171,7 +171,7 @@ proforma, hotel vouchers.
 Trial balance, P&L, balance sheet, outstanding/ageing, GSTR-1 (+JSON), GSTR-2, GSTR-3B, sales &
 purchase registers, group purchase, multi-line vouchers, year close & balance transfer.
 
-**M5 — Team & insight**
+**M5 — Team & insight** ✅ (plus group/FD purchases and batch receipts/payments)
 Roles & permissions UI, user hierarchy, CRM dashboard, alerts, mobile layout.
 
 **M6 — Integrations**

@@ -133,6 +133,8 @@ export const BILL_TYPE_KEYS = Object.keys(BILL_TYPES) as BillType[]
 export const LINE_COLUMNS = ['airline_id', 'flight_no', 'sector', 'travel_date', 'return_date', 'pnr', 'ticket_no', 'description'] as const
 
 export type LineDraft = {
+  /** seat sold from a group / fixed-departure purchase (cost comes from the group) */
+  group_purchase_id: string
   service: Service
   pax_name: string
   pax_type: 'adult' | 'child' | 'infant'
@@ -152,6 +154,19 @@ export type LineDraft = {
   tds: string
 }
 
+export type GroupOpt = {
+  id: string
+  bill_no: string
+  sector: string | null
+  pnr: string | null
+  flight_no: string | null
+  airline_id: string | null
+  travel_date: string | null
+  seats: number
+  left_seats: number
+  cost_per_seat: number
+}
+
 export type InvoiceDraft = {
   id?: string
   doc_kind?: 'invoice' | 'proforma'
@@ -169,6 +184,7 @@ export type InvoiceDraft = {
 }
 
 export const emptyLine = (bt: BillType = 'domestic'): LineDraft => ({
+  group_purchase_id: '',
   service: BILL_TYPES[bt].services[0],
   pax_name: '',
   pax_type: 'adult',

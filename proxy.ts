@@ -34,6 +34,7 @@ export async function proxy(request: NextRequest) {
     const to = request.nextUrl.clone()
     to.pathname = '/login'
     to.search = ''
+    if (path !== '/' && path !== '/dashboard') to.searchParams.set('next', path + request.nextUrl.search)
     return NextResponse.redirect(to)
   }
   return response

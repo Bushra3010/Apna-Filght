@@ -3,7 +3,7 @@
 Travel ERP + CRM for Indian travel agencies: leads and follow-ups, flight invoices with GST,
 receipts, double-entry accounts and ledger statements. Built with Next.js and Supabase.
 
-**What's in it (Milestones 1–4):**
+**What's in it (Milestones 1–5):**
 - **CRM:** leads with services, pax, source, assignment, status and follow-ups → quotation → proforma → invoice.
 - **Holiday packages:** hotels with dated room rates (class, room category, meal plan), activity rates,
   vehicles priced per km, routes, policies, and day-wise itineraries. The quotation builder prices a
@@ -25,6 +25,11 @@ receipts, double-entry accounts and ledger statements. Built with Next.js and Su
 - **GST:** GSTR-1 (B2B, B2CL, B2CS, CDNR, CDNUR, nil/exempt, SAC summary) with portal JSON,
   GSTR-2 purchase / ITC listing, GSTR-3B summary.
 - **Year-end:** create the next financial year, carry balances forward, close and reopen years.
+- **Team:** invite staff by link, roles with database-enforced permissions, reporting hierarchy,
+  lead transfer, CRM dashboard (me / my team / everyone), alerts with a header bell.
+- **Group / FD purchases:** buy a block of seats, sell them from flight invoices, track seats left
+  and profit per group. Batch entry for receipts and payments.
+- **Companies:** several companies per login (Settings → Companies).
 - **Masters:** ledgers, passengers (passport expiry flags), pick-lists (booked by, meal plans…).
 - **Dashboard:** sales, margin, receivable, receipts, monthly sales chart, receivable ageing.
 

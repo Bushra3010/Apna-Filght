@@ -1,12 +1,14 @@
 import Link from 'next/link'
-import { LogOut, Plane } from 'lucide-react'
+import { Bell, LogOut, Plane } from 'lucide-react'
 import { getContext } from '@/lib/context'
+import { loadAlerts } from '@/lib/alerts'
 import { signOut } from '../(auth)/actions'
 import { Rail, Tabs } from '@/components/shell/nav'
 import { Button } from '@/components/ui/button'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext()
+  const alertCount = (await loadAlerts()).length
   const initials = (ctx.member.name || ctx.user.email).replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean).slice(0, 2).map((w: string) => w[0]?.toUpperCase()).join('')
 
   return (
@@ -34,6 +36,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               title="Financial year"
             >
               FY {ctx.fy.label}{ctx.fy.is_closed && ' · closed'}
+            </Link>
+            <Link
+              href="/reports/alerts"
+              aria-label={`Alerts: ${alertCount}`}
+              title="Alerts"
+              className="relative flex size-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground"
+            >
+              <Bell className="size-[18px]" />
+              {alertCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-tile-red px-1 text-[10px] font-bold text-white">
+                  {alertCount > 99 ? '99+' : alertCount}
+                </span>
+              )}
             </Link>
             <span
               title={ctx.user.email}

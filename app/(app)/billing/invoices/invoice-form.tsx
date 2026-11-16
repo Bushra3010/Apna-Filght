@@ -10,7 +10,7 @@ import { Field, FormError, NativeSelect, SubmitButton } from '@/components/form'
 import { LinkButton } from '@/components/link-button'
 import { computeLine, GST_RATES, type GstOn } from '@/lib/gst'
 import { formatINR, toPaise } from '@/lib/money'
-import { BILL_TYPES, BILL_TYPE_KEYS, emptyLine, type BillType, type InvoiceDraft, type LineDraft, type Service } from '@/lib/invoice'
+import { BILL_TYPES, BILL_TYPE_KEYS, emptyLine, type BillType, type GroupOpt, type InvoiceDraft, type LineDraft, type Service } from '@/lib/invoice'
 import { cn } from '@/lib/utils'
 import { saveInvoice } from './actions'
 
@@ -31,6 +31,7 @@ export function InvoiceForm({
   bookedBy,
   passengers,
   orgStateId,
+  groups,
 }: {
   draft: InvoiceDraft
   customers: Party[]
@@ -40,6 +41,7 @@ export function InvoiceForm({
   bookedBy: Option[]
   passengers: string[]
   orgStateId: string | null
+  groups: GroupOpt[]
 }) {
   const [state, action] = useActionState(saveInvoice, undefined)
   const [draft, setDraft] = useState<InvoiceDraft>(initial)
@@ -82,15 +84,19 @@ export function InvoiceForm({
             discount: toPaise(l.discount),
             gst_rate: cfg.noGst ? 0 : Number(l.gst_rate),
             gst_on: l.gst_on,
-            purchase_gross: toPaise(l.purchase_gross),
-            purchase_gst: toPaise(l.purchase_gst),
-            commission: toPaise(l.commission),
-            tds: toPaise(l.tds),
+            purchase_gross: l.group_purchase_id ? 0 : toPaise(l.purchase_gross),
+            purchase_gst: l.group_purchase_id ? 0 : toPaise(l.purchase_gst),
+            commission: l.group_purchase_id ? 0 : toPaise(l.commission),
+            tds: l.group_purchase_id ? 0 : toPaise(l.tds),
           },
           interstate,
         ),
-      ),
-    [draft.lines, interstate, cfg],
+      ).map((c, i) => {
+        // a seat from a group costs the group's price per seat
+        const g = groups.find((x) => x.id === draft.lines[i].group_purchase_id)
+        return g ? { ...c, net_purchase: 0, margin: c.margin - g.cost_per_seat } : c
+      }),
+    [draft.lines, interstate, cfg, groups],
   )
   const totals = computed.reduce(
     (a, c) => ({
@@ -237,6 +243,32 @@ export function InvoiceForm({
               </div>
             </div>
 
+            {l.service === 'flight' && groups.length > 0 && (
+              <Field label="Seat from group / FD" htmlFor={`grp-${i}`} hint={l.group_purchase_id ? 'Cost comes from the group purchase; no supplier entry needed.' : undefined}>
+                <NativeSelect
+                  id={`grp-${i}`}
+                  value={l.group_purchase_id}
+                  onChange={(e) => {
+                    const g = groups.find((x) => x.id === e.target.value)
+                    setLine(i, g
+                      ? {
+                          group_purchase_id: g.id,
+                          fields: { ...l.fields, airline_id: g.airline_id ?? '', flight_no: g.flight_no ?? '', sector: g.sector ?? '', pnr: g.pnr ?? '', travel_date: g.travel_date ?? '' },
+                          supplier_ledger_id: '', supplier_invoice_no: '', purchase_gross: '', purchase_gst: '', commission: '', tds: '',
+                        }
+                      : { group_purchase_id: '' })
+                  }}
+                >
+                  <option value="">— Not from a group —</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id} disabled={g.left_seats <= 0 && g.id !== l.group_purchase_id}>
+                      {g.bill_no} · {[g.sector, g.pnr].filter(Boolean).join(' · ')} · {g.travel_date && new Date(g.travel_date).toLocaleDateString('en-IN')} · {g.left_seats} left
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+            )}
+
             <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-6">
               <Field label={cfg.paxLabel} htmlFor={`pax-${i}`} className="sm:col-span-2">
                 <Input id={`pax-${i}`} list="passenger-names" className="uppercase" value={l.pax_name} onChange={(e) => setLine(i, { pax_name: e.target.value })} />
@@ -302,7 +334,7 @@ export function InvoiceForm({
               </div>
             </div>
 
-            {cfg.purchase && (
+            {cfg.purchase && !l.group_purchase_id && (
               <div className="grid gap-3 rounded-2xl bg-muted/60 p-4">
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Purchase from supplier (₹)</p>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">

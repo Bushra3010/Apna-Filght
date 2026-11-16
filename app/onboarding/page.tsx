@@ -32,7 +32,7 @@ export default async function OnboardingPage() {
         </div>
         <p className="mb-5 text-sm text-muted-foreground">
           We’ll create your chart of accounts, tax ledgers and document numbering. You can add GSTIN, address and bank
-          details later in Settings.
+          details later in Settings. Joining someone else’s company instead? Open the invite link they sent you.
         </p>
         <CompanyForm states={(states ?? []) as { gst_code: string; name: string }[]} fyStart={`${y}-04-01`} />
       </div>

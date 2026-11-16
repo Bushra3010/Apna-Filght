@@ -8,13 +8,16 @@ import { Field, FormError, SubmitButton, type FormState } from '@/components/for
 export function AuthForm({
   action,
   mode,
+  next,
 }: {
   action: (s: FormState, f: FormData) => Promise<FormState>
   mode: 'login' | 'signup'
+  next?: string
 }) {
   const [state, formAction] = useActionState(action, undefined)
   return (
     <form action={formAction} className="grid gap-4">
+      {next && <input type="hidden" name="next" value={next} />}
       <Field label="Email" htmlFor="email">
         <Input id="email" name="email" type="email" autoComplete="email" required />
       </Field>
@@ -33,11 +36,11 @@ export function AuthForm({
       <p className="text-center text-sm text-muted-foreground">
         {mode === 'login' ? (
           <>
-            New to Apna Flight? <Link className="text-primary underline-offset-4 hover:underline" href="/signup">Create an account</Link>
+            New to Apna Flight? <Link className="text-primary underline-offset-4 hover:underline" href={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'}>Create an account</Link>
           </>
         ) : (
           <>
-            Already have an account? <Link className="text-primary underline-offset-4 hover:underline" href="/login">Sign in</Link>
+            Already have an account? <Link className="text-primary underline-offset-4 hover:underline" href={next ? `/login?next=${encodeURIComponent(next)}` : '/login'}>Sign in</Link>
           </>
         )}
       </p>

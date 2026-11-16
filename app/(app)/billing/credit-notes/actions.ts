@@ -82,6 +82,7 @@ export async function saveCreditNote(_: FormState, form: FormData): Promise<Form
       airline_id: o.airline_id, flight_no: o.flight_no, pnr: o.pnr, ticket_no: o.ticket_no, sector: o.sector,
       travel_date: o.travel_date, return_date: o.return_date, details: o.details,
       ...a, taxable: t.taxable, cgst: t.cgst, sgst: t.sgst, igst: t.igst, net_sale: t.net_sale,
+      group_purchase_id: o.group_purchase_id,
       supplier_ledger_id: a.purchase_gross || a.commission || a.tds ? o.supplier_ledger_id : null,
       supplier_invoice_no: o.supplier_invoice_no, net_purchase: t.net_purchase,
     })

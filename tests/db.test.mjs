@@ -310,6 +310,70 @@ await rejects(as(U1, `insert into opening_balances (org_id, fy_id, ledger_id, am
 await one(U1, `select public.reopen_year($1,$2)`, [org1, fy])
 ok(!(await db.query(`select is_closed from financial_years where id=$1`, [fy])).rows[0].is_closed, 'owner can reopen a year')
 
+// --- M5: team security, invites, hierarchy, transfer, groups, alerts, CRM dashboard
+const U3 = '33333333-3333-3333-3333-333333333333'
+await db.exec(`insert into auth.users values ('${U3}','staff@example.com')`)
+const salesRole = (await db.query(`select id from roles where org_id=$1 and name='Sales'`, [org1])).rows[0].id
+const ownerRole = (await db.query(`select id from roles where org_id=$1 and is_owner`, [org1])).rows[0].id
+await rejects(as(U3, `select public.invite_member($1,'x@example.com',$2)`, [org1, salesRole]), 'a non-member cannot invite')
+const wrongTok = (await one(U1, `select public.invite_member($1,'someone@example.com',$2) t`, [org1, salesRole])).t
+await rejects(as(U3, `select public.accept_invite($1)`, [wrongTok]), 'an invite cannot be used by a different email')
+const tok = (await one(U1, `select public.invite_member($1,'Staff@Example.com',$2) t`, [org1, salesRole])).t
+const info = await one(U3, `select * from public.invite_info($1)`, [tok])
+ok(info.org_name === 'Apna Flight' && info.role_name === 'Sales' && info.email_matches, 'invite link shows company and role to the invited person')
+ok((await db.query(`select count(*)::int n from org_invites where token_hash = $1`, [tok])).rows[0].n === 0, 'only a hash of the invite token is stored')
+ok((await one(U3, `select public.accept_invite($1) o`, [tok])).o === org1, 'invited staff joins the company')
+await rejects(as(U3, `select public.accept_invite($1)`, [tok]), 'an invite works only once')
+const m3 = (await db.query(`select id from org_members where org_id=$1 and user_id=$2`, [org1, U3])).rows[0].id
+const m1 = (await db.query(`select id from org_members where org_id=$1 and user_id=$2`, [org1, U1])).rows[0].id
+
+await as(U3, `update org_members set role_id=$1 where id=$2`, [ownerRole, m3])
+ok((await db.query(`select role_id from org_members where id=$1`, [m3])).rows[0].role_id === salesRole, 'staff cannot make themselves owner by editing the table')
+await as(U3, `update roles set permissions='{"invoice":["post"]}' where id=$1`, [salesRole])
+ok(!JSON.stringify((await db.query(`select permissions from roles where id=$1`, [salesRole])).rows[0].permissions).includes('post'), 'staff cannot edit role permissions directly')
+await as(U3, `update financial_years set is_closed = true where id=$1`, [fy])
+ok(!(await db.query(`select is_closed from financial_years where id=$1`, [fy])).rows[0].is_closed, 'staff cannot close or reopen years directly')
+await rejects(as(U3, `select public.update_member($1,$2,$3)`, [org1, m3, { role_id: ownerRole }]), 'staff cannot change roles through the function either')
+await rejects(as(U3, `select public.save_invoice($1,$2,$3)`, [org1, { bill_type: 'domestic', invoice_date: '2026-11-25', party_ledger_id: cust }, [line]]), 'a Sales role cannot raise invoices')
+const staffLead = (await one(U3, `select public.save_lead($1,$2) id`, [org1, { guest_name: 'Walk In', phone: '9111111111', travel_date_open: true }])).id
+ok(!!staffLead, 'a Sales role can create leads')
+
+await one(U1, `select public.update_member($1,$2,$3)`, [org1, m3, { reports_to: m1, designation: 'Travel consultant' }])
+await rejects(as(U1, `select public.update_member($1,$2,$3)`, [org1, m1, { reports_to: m3 }]), 'reporting loops are rejected')
+await rejects(as(U1, `select public.update_member($1,$2,$3)`, [org1, m1, { role_id: salesRole }]), 'the last owner cannot be demoted')
+const acct = (await one(U1, `select public.save_role($1,null,'Accountant',$2) id`, [org1, { invoice: ['view', 'create', 'edit', 'post'], voucher: ['view', 'create'] }])).id
+ok(!!acct, 'owner can create a role')
+await rejects(as(U1, `select public.save_role($1,$2,'Boss','{}')`, [org1, ownerRole]), 'the Owner role cannot be edited')
+
+const moved = (await one(U1, `select public.transfer_leads($1,$2,$3,$4) n`, [org1, m1, m3, ['proposal', 'initial']])).n
+ok(moved >= 1, `lead transfer moved ${moved} lead(s)`)
+const crmSelf = (await one(U3, `select public.crm_dashboard($1,$2,'self') d`, [org1, fy])).d
+const crmAll = (await one(U1, `select public.crm_dashboard($1,$2,'all') d`, [org1, fy])).d
+ok(crmSelf.live >= 1 && crmAll.people.length === 2 && typeof crmAll.funnel.booked === 'number', `CRM dashboard: staff sees ${crmSelf.live} live lead(s); owner sees ${crmAll.people.length} people`)
+const crmTeam = (await one(U1, `select public.crm_dashboard($1,$2,'team') d`, [org1, fy])).d
+ok(crmTeam.people.length === 2, 'owner\'s team view includes people reporting to them')
+
+// group purchase: 3 seats for ₹15,000; sell 2 at ₹6,000 each (fare only)
+const grpBill = (await one(U1, `select public.save_group_purchase($1,$2) id`, [org1, { supplier_ledger_id: supp, bill_date: '2026-11-25', bill_type: 'domestic',
+  sector: 'del-goa', pnr: 'grp1', travel_date: '2026-12-24', seats: 3, amount: 1500000, gst: 0 }])).id
+const G = (await db.query(`select bill_no, total, status from purchase_bills where id=$1`, [grpBill])).rows[0]
+ok(G.bill_no === 'GP-0001' && G.status === 'posted' && Number(G.total) === 1500000, `group purchase ${G.bill_no} posted`)
+const seat = (n) => ({ service: 'flight', pax_name: n, basic: 600000, taxable: 0, gst_rate: 18, net_sale: 600000, group_purchase_id: grpBill })
+const gi = (await one(U1, `select public.save_invoice($1,$2,$3) id`, [org1, { bill_type: 'domestic', invoice_date: '2026-11-26', party_ledger_id: cust, place_of_supply_state_id: mh }, [seat('A'), seat('B')]])).id
+await rejects(as(U1, `select public.save_invoice($1,$2,$3)`, [org1, { bill_type: 'domestic', invoice_date: '2026-11-26', party_ledger_id: cust, place_of_supply_state_id: mh }, [seat('C'), seat('D')]]), 'selling more seats than the group has is rejected')
+await one(U1, `select public.save_invoice($1,$2,$3) id`, [org1, { id: gi, bill_type: 'domestic', invoice_date: '2026-11-26', party_ledger_id: cust, place_of_supply_state_id: mh }, [seat('A'), seat('B')]])
+ok(true, 'editing an invoice with group seats does not count them twice')
+await rejects(as(U1, `select public.save_invoice($1,$2,$3)`, [org1, { bill_type: 'domestic', invoice_date: '2026-11-26', party_ledger_id: cust, place_of_supply_state_id: mh }, [{ ...seat('E'), supplier_ledger_id: supp, purchase_gross: 100, net_purchase: 100 }]]), 'a group seat cannot also carry a supplier cost')
+const VG = await one(U1, `select sold, left_seats, revenue, profit from v_group_purchase where id=$1`, [grpBill])
+ok(VG.sold === 2 && VG.left_seats === 1 && Number(VG.revenue) === 1200000 && Number(VG.profit) === 1200000 - 1500000, `group: 2 sold, 1 left, profit so far ₹${Number(VG.profit) / 100}`)
+const gm = (await one(U1, `select sum(margin)::bigint m from v_invoice_line_margin where invoice_id=$1`, [gi])).m
+ok(Number(gm) === 2 * (600000 - 500000), `seat margin uses the group's cost per seat (₹${Number(gm) / 100})`)
+
+const al = (await as(U1, `select kind, doc_no from public.alerts($1,$2)`, [org1, fy])).rows
+ok(al.some((a) => a.kind === 'pending_purchase' && a.doc_no === 'INV-0003') && al.some((a) => a.kind === 'loss_cn'), `alerts (tour invoice without cost, refund above recovery): ${[...new Set(al.map((a) => a.kind))].join(', ')}`)
+const tb3 = (await one(U1, `select sum(closing)::bigint s from app.ledger_balances($1,$2,'2026-04-01','2027-03-31')`, [org1, fy])).s
+ok(Number(tb3) === 0, 'trial balance still nets to zero after M5 transactions')
+
 // --- guards
 await rejects(as(U1, `insert into ledger_entries (org_id,fy_id,entry_date,ledger_id,debit,source_type,source_id,doc_no) values ($1,$2,'2026-11-17',$3,1,'voucher',gen_random_uuid(),'x')`, [org1, fy, bank]), 'direct GL write blocked')
 ok((await as(U1, `delete from invoices where id=$1 returning id`, [inv])).rows.length === 0, 'posted invoice cannot be deleted')
