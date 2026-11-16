@@ -37,6 +37,8 @@ const Line = z.object({
 
 const Invoice = z.object({
   id: z.string().optional(),
+  doc_kind: z.enum(['invoice', 'proforma']).default('invoice'),
+  quotation_id: z.string().optional(),
   bill_type: z.enum(BILL_TYPE_KEYS as [BillType, ...BillType[]]),
   invoice_date: z.iso.date('Choose the invoice date'),
   due_date: optDate,
@@ -133,6 +135,7 @@ export async function saveInvoice(_: FormState, form: FormData): Promise<FormSta
 
   const header = {
     id: inv.id,
+    doc_kind: inv.doc_kind,
     bill_type: inv.bill_type,
     invoice_date: inv.invoice_date,
     due_date: nul(inv.due_date),
@@ -146,10 +149,28 @@ export async function saveInvoice(_: FormState, form: FormData): Promise<FormSta
   const { data: id, error } = await supabase.rpc('save_invoice', { p_org: org.id, p_header: header, p_lines: lines, p_post: true })
   if (error) return { error: friendlyError(error.message) }
 
-  if (header.lead_id && !inv.id) {
+  if (inv.quotation_id && !inv.id) {
+    const { count } = await supabase.from('quotations').select('id', { count: 'exact', head: true }).eq('id', inv.quotation_id).eq('org_id', org.id)
+    if (count) await supabase.from('invoices').update({ quotation_id: inv.quotation_id }).eq('id', id).eq('org_id', org.id)
+  }
+  if (header.lead_id && !inv.id && inv.doc_kind === 'invoice') {
     await supabase.from('leads').update({ status: 'booked' }).eq('id', header.lead_id).eq('org_id', org.id)
   }
   revalidatePath('/billing/invoices')
+  revalidatePath('/billing/proformas')
   revalidatePath('/dashboard')
   redirect(`/billing/invoices/${id}`)
+}
+
+export async function convertProforma(form: FormData) {
+  const id = String(form.get('id'))
+  const date = String(form.get('date') || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }))
+  const { supabase, org } = await getContext()
+  const { data: inv, error } = await supabase.rpc('convert_proforma', { p_org: org.id, p_proforma: id, p_date: date })
+  if (error) redirect(`/billing/invoices/${id}?error=${encodeURIComponent(friendlyError(error.message))}`)
+  const { data: pf } = await supabase.from('invoices').select('lead_id').eq('id', id).single()
+  if (pf?.lead_id) await supabase.from('leads').update({ status: 'booked' }).eq('id', pf.lead_id).eq('org_id', org.id)
+  revalidatePath('/billing/proformas')
+  revalidatePath('/billing/invoices')
+  redirect(`/billing/invoices/${inv}`)
 }

@@ -34,7 +34,7 @@ One database, one app. No microservices.
 ## 2. Data model
 
 `supabase/migrations/` — **43 tables, 2 views, posting + RPC functions**, tested on real Postgres
-(`npm run test:db`, 53 checks).
+(`npm run test:db`, 65 checks).
 
 | Area | Tables |
 |---|---|
@@ -163,7 +163,7 @@ All 10 invoice types, credit notes (with cancellation charges), lead assignment,
 bill-wise adjustment, general purchase, cash/bank/day book, lookups, passengers, dashboard charts.
 (Server-side PDF + email moved to M6 with the other integrations; browser print/PDF works today.)
 
-**M3 — Holiday packages (CRM depth)**
+**M3 — Holiday packages (CRM depth)** ✅
 Itineraries, policies, hotels + rates, activities, vehicles, routes, quotation builder with print,
 proforma, hotel vouchers.
 

@@ -31,6 +31,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         actions={
           <>
             <Badge variant={statusTone(lead.status)}>{label(LEAD_STATUSES, lead.status)}</Badge>
+            <LinkButton href={`/crm/quotations/new?lead=${lead.id}`} variant="outline">Create quotation</LinkButton>
             <LinkButton href={`/billing/invoices/new?lead=${lead.id}`}>Create invoice</LinkButton>
           </>
         }

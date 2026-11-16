@@ -4,18 +4,38 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   ArrowLeftRight, BookOpen, Banknote, CalendarDays, Contact, FileMinus, FileText, LayoutDashboard, List,
-  NotebookPen, Plane, Receipt, Settings, ShoppingCart, Users, Wallet, Landmark,
+  NotebookPen, Plane, Receipt, Settings, ShoppingCart, Users, Wallet, Landmark, Map as MapIcon, Hotel, Car, Route,
+  ScrollText, FileSignature, Ticket, BedDouble, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export const NAV = [
   { group: '', items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
-  { group: 'CRM', items: [{ href: '/crm/leads', label: 'Leads', icon: Contact }] },
+  {
+    group: 'CRM',
+    items: [
+      { href: '/crm/leads', label: 'Leads', icon: Contact },
+      { href: '/crm/quotations', label: 'Quotations', icon: FileSignature },
+      { href: '/crm/itineraries', label: 'Itineraries', icon: MapIcon },
+    ],
+  },
+  {
+    group: 'Packages',
+    items: [
+      { href: '/crm/hotels', label: 'Hotels & rates', icon: Hotel },
+      { href: '/crm/activities', label: 'Activities', icon: Sparkles },
+      { href: '/crm/vehicles', label: 'Vehicles', icon: Car },
+      { href: '/crm/routes', label: 'Routes', icon: Route },
+      { href: '/crm/policies', label: 'Policies', icon: ScrollText },
+    ],
+  },
   {
     group: 'Billing',
     items: [
       { href: '/billing/invoices', label: 'Invoices', icon: FileText },
+      { href: '/billing/proformas', label: 'Proformas', icon: Ticket },
       { href: '/billing/credit-notes', label: 'Credit notes', icon: FileMinus },
+      { href: '/billing/hotel-vouchers', label: 'Hotel vouchers', icon: BedDouble },
     ],
   },
   { group: 'Purchase', items: [{ href: '/purchase/general', label: 'Purchase bills', icon: ShoppingCart }] },

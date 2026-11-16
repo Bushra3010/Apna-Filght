@@ -154,6 +154,8 @@ export type LineDraft = {
 
 export type InvoiceDraft = {
   id?: string
+  doc_kind?: 'invoice' | 'proforma'
+  quotation_id?: string
   bill_type: BillType
   invoice_date: string
   due_date: string

@@ -16,12 +16,13 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
     supabase.from('invoice_lines').select('*').eq('invoice_id', id).order('sort'),
     getInvoiceFormOptions(),
   ])
-  if (!inv || inv.status === 'cancelled' || inv.doc_kind !== 'invoice') notFound()
+  if (!inv || inv.status === 'cancelled' || inv.doc_kind === 'credit_note' || inv.converted_to_invoice_id) notFound()
   const cfg = BILL_TYPES[inv.bill_type as BillType]
 
   const s = (v: string | null | undefined) => v ?? ''
   const draft: InvoiceDraft = {
     id: inv.id,
+    doc_kind: inv.doc_kind,
     bill_type: inv.bill_type,
     invoice_date: inv.invoice_date,
     due_date: s(inv.due_date),
@@ -60,7 +61,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   }
   return (
     <>
-      <PageHeader title={`Edit ${inv.invoice_no}`} description="Saving re-posts the invoice to the accounts." />
+      <PageHeader title={`Edit ${inv.invoice_no}`} description={inv.doc_kind === 'proforma' ? 'Proformas do not affect the accounts.' : 'Saving re-posts the invoice to the accounts.'} />
       <InvoiceForm draft={draft} {...opts} />
     </>
   )

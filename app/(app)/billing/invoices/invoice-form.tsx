@@ -44,6 +44,8 @@ export function InvoiceForm({
   const [state, action] = useActionState(saveInvoice, undefined)
   const [draft, setDraft] = useState<InvoiceDraft>(initial)
   const cfg = BILL_TYPES[draft.bill_type]
+  const isPf = draft.doc_kind === 'proforma'
+  const docLabel = isPf ? 'proforma' : 'invoice'
   const interstate = !!orgStateId && !!draft.place_of_supply_state_id && orgStateId !== draft.place_of_supply_state_id
 
   const set = <K extends keyof InvoiceDraft>(k: K, v: InvoiceDraft[K]) => setDraft((d) => ({ ...d, [k]: v }))
@@ -136,14 +138,14 @@ export function InvoiceForm({
       </datalist>
 
       <section className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label="Invoice type" htmlFor="bill_type" required>
+        <Field label={isPf ? 'Proforma type' : 'Invoice type'} htmlFor="bill_type" required>
           <NativeSelect id="bill_type" value={draft.bill_type} onChange={(e) => changeType(e.target.value as BillType)} disabled={!!draft.id}>
             {BILL_TYPE_KEYS.map((v) => (
               <option key={v} value={v}>{BILL_TYPES[v].label}</option>
             ))}
           </NativeSelect>
         </Field>
-        <Field label="Invoice date" htmlFor="invoice_date" required>
+        <Field label={isPf ? 'Proforma date' : 'Invoice date'} htmlFor="invoice_date" required>
           <Input id="invoice_date" type="date" value={draft.invoice_date} onChange={(e) => set('invoice_date', e.target.value)} required />
         </Field>
         <Field label="Due date" htmlFor="due_date">
@@ -350,14 +352,14 @@ export function InvoiceForm({
       </div>
 
       <section className="grid gap-4 rounded-xl border p-4 lg:grid-cols-[1fr_320px]">
-        <Field label="Notes (printed on invoice)" htmlFor="notes">
+        <Field label={`Notes (printed on ${docLabel})`} htmlFor="notes">
           <Textarea id="notes" rows={3} value={draft.notes} onChange={(e) => set('notes', e.target.value)} />
         </Field>
         <dl className="grid content-start gap-1.5 text-sm">
           {!cfg.noGst && <Row label="Taxable value" v={totals.taxable} />}
           {!cfg.noGst && (interstate ? <Row label="IGST" v={totals.igst} /> : (<><Row label="CGST" v={totals.cgst} /><Row label="SGST" v={totals.sgst} /></>))}
           <div className="my-1 border-t" />
-          <Row label="Invoice total" v={totals.net_sale} strong />
+          <Row label={isPf ? 'Proforma total' : 'Invoice total'} v={totals.net_sale} strong />
           {cfg.purchase && <Row label="Payable to suppliers" v={totals.net_purchase} />}
           <Row label="Margin" v={totals.margin} />
         </dl>
@@ -365,8 +367,8 @@ export function InvoiceForm({
 
       <FormError state={state} />
       <div className="flex flex-wrap items-center gap-2">
-        <SubmitButton>{draft.id ? 'Save & re-post invoice' : 'Save & post invoice'}</SubmitButton>
-        <LinkButton href={draft.id ? `/billing/invoices/${draft.id}` : '/billing/invoices'} variant="outline">Cancel</LinkButton>
+        <SubmitButton>{isPf ? 'Save proforma' : draft.id ? 'Save & re-post invoice' : 'Save & post invoice'}</SubmitButton>
+        <LinkButton href={draft.id ? `/billing/invoices/${draft.id}` : isPf ? '/billing/proformas' : '/billing/invoices'} variant="outline">Cancel</LinkButton>
         {cfg.purchase && !suppliers.length && (
           <p className="text-xs text-muted-foreground">
             Tip: <Link href="/masters/ledgers/new?kind=supplier" className="underline">add a supplier</Link> to record the purchase side and margin.

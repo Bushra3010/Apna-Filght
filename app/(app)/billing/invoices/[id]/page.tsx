@@ -7,6 +7,9 @@ import { describeLine } from '@/lib/invoice'
 import { LinkButton } from '@/components/link-button'
 import { PrintButton } from '@/components/print-button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { convertProforma } from '../actions'
 
 export const metadata = { title: 'Invoice' }
 
@@ -15,13 +18,14 @@ type Bal = { allocated: number; balance: number; credited: number; pay_status: s
 
 const STATUS_LABEL: Record<string, string> = { refund_due: 'refund due', paid: 'paid', partial: 'partial', unpaid: 'unpaid', cancelled: 'cancelled' }
 
-export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InvoicePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
+  const { error: actionError } = await searchParams
   const { supabase, org } = await getContext()
   const [{ data: inv }, { data: lines }, { data: company }, { data: bal }, { data: credits }] = await Promise.all([
     supabase
       .from('invoices')
-      .select('*, party:ledgers!invoices_party_ledger_id_fkey(name, gstin, address, mobile), pos:states!invoices_place_of_supply_state_id_fkey(name, gst_code), ref:ref_invoice_id(id, invoice_no, invoice_date), booked:lookups!invoices_booked_by_id_fkey(name)')
+      .select('*, party:ledgers!invoices_party_ledger_id_fkey(name, gstin, address, mobile), pos:states!invoices_place_of_supply_state_id_fkey(name, gst_code), ref:ref_invoice_id(id, invoice_no, invoice_date), conv:converted_to_invoice_id(id, invoice_no), quote:quotation_id(id, quote_no), booked:lookups!invoices_booked_by_id_fkey(name)')
       .eq('org_id', org.id)
       .eq('id', id)
       .maybeSingle(),
@@ -39,9 +43,13 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const cs = company?.states as unknown as { name: string; gst_code: string } | null
   const inter = inv.is_interstate as boolean
   const isCN = inv.doc_kind === 'credit_note'
+  const isPf = inv.doc_kind === 'proforma'
+  const conv = inv.conv as unknown as { id: string; invoice_no: string } | null
+  const quote = inv.quote as unknown as { id: string; quote_no: string } | null
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
   const noGst = inv.bill_type === 'bill_of_supply'
   const hasXt = lines?.some((l) => Number(l.xt) !== 0)
-  const title = isCN ? 'CREDIT NOTE' : noGst ? 'BILL OF SUPPLY' : 'TAX INVOICE'
+  const title = isCN ? 'CREDIT NOTE' : isPf ? 'PROFORMA INVOICE' : noGst ? 'BILL OF SUPPLY' : 'TAX INVOICE'
   const date = (d: string) => new Date(d).toLocaleDateString('en-IN', { dateStyle: 'medium' })
 
   return (
@@ -49,7 +57,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold">{inv.invoice_no}</h1>
-          <Badge variant="secondary">{isCN ? 'credit note' : inv.status}</Badge>
+          <Badge variant="secondary">{isCN ? 'credit note' : isPf ? (conv ? 'proforma · invoiced' : 'proforma') : inv.status}</Badge>
+          {conv && <Link href={`/billing/invoices/${conv.id}`} className="text-sm text-muted-foreground underline">→ {conv.invoice_no}</Link>}
+          {quote && <Link href={`/crm/quotations/${quote.id}`} className="text-sm text-muted-foreground underline">{quote.quote_no}</Link>}
           {b && <Badge variant={b.pay_status === 'paid' ? 'default' : b.pay_status === 'refund_due' ? 'destructive' : 'outline'}>{STATUS_LABEL[b.pay_status] ?? b.pay_status}</Badge>}
           {ref && (
             <span className="text-sm text-muted-foreground">
@@ -59,8 +69,16 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </div>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
-          {!isCN && <LinkButton href={`/billing/invoices/${inv.id}/edit`} variant="outline">Edit</LinkButton>}
-          {!isCN && b && b.pay_status !== 'cancelled' && (
+          {inv.bill_type === 'hotel' && !isCN && !isPf && <LinkButton href={`/billing/hotel-vouchers/new?invoice=${inv.id}`} variant="outline">Hotel voucher</LinkButton>}
+          {!isCN && !conv && <LinkButton href={`/billing/invoices/${inv.id}/edit`} variant="outline">Edit</LinkButton>}
+          {isPf && !conv && (
+            <form action={convertProforma} className="flex gap-2">
+              <input type="hidden" name="id" value={inv.id} />
+              <Input type="date" name="date" defaultValue={today} aria-label="Invoice date" className="w-36" />
+              <Button type="submit">Convert to invoice</Button>
+            </form>
+          )}
+          {!isCN && !isPf && b && b.pay_status !== 'cancelled' && (
             <LinkButton href={`/billing/credit-notes/new?invoice=${inv.id}`} variant="outline">Cancel / refund</LinkButton>
           )}
           {b && Number(b.balance) > 0 && (
@@ -72,6 +90,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
+      {actionError && <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive print:hidden">{actionError}</p>}
       {credits && credits.length > 0 && (
         <p className="mb-4 text-sm text-muted-foreground print:hidden">
           Credit notes:{' '}

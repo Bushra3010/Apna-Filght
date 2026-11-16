@@ -208,6 +208,61 @@ ok(ag.length === 6 && ag.reduce((s, r) => s + Number(r.amount), 0) === 615400 - 
 const tb2 = (await one(U1, `select sum(closing)::bigint s from app.ledger_balances($1,$2,'2026-04-01','2027-03-31')`, [org1, fy])).s
 ok(Number(tb2) === 0, 'trial balance still nets to zero after M2 transactions')
 
+// --- M3: packages, itinerary, quotation, proforma, hotel voucher
+const lk = async (kind, name) => (await one(U1, `insert into lookups (org_id,kind,name) values ($1,$2,$3) returning id`, [org1, kind, name])).id
+const deluxe = (await db.query(`select id from lookups where org_id=$1 and kind='package_class' and name='Deluxe'`, [org1])).rows[0].id
+const cp = (await db.query(`select id from lookups where org_id=$1 and kind='meal_plan' and name like 'CP%'`, [org1])).rows[0].id
+const shimla = (await db.query(`select id from cities where name='Shimla'`)).rows[0].id
+const route = (await one(U1, `insert into routes (org_id,name) values ($1,'Delhi – Shimla – Manali – Delhi') returning id`, [org1])).id
+const title = await lk('package_title', 'Himachal Delight')
+const hotel = (await one(U1, `insert into hotels (org_id,name,city_id) values ($1,'Snow View',$2) returning id`, [org1, shimla])).id
+const rate = (await one(U1, `insert into hotel_rates (org_id,hotel_id,package_class_id,meal_plan_id,rate_type,sell_rate,cost_rate,valid_from,valid_to)
+  values ($1,$2,$3,$4,'per_room_night',450000,380000,'2026-10-01','2027-03-31') returning id`, [org1, hotel, deluxe, cp])).id
+const actv = await lk('activity', 'Solang Valley')
+const arate = (await one(U1, `insert into activity_rates (org_id,activity_id,city_id,sell_rate,cost_rate) values ($1,$2,$3,150000,100000) returning id`, [org1, actv, shimla])).id
+const car = (await one(U1, `insert into vehicles (org_id,name,capacity,rate_per_km,night_charge) values ($1,'Innova',6,1800,30000) returning id`, [org1])).id
+
+const itin = (await one(U1, `select public.save_itinerary($1,$2,$3) id`, [org1,
+  { title: 'Himachal 4N', route_id: route, package_title_id: title, nights: 4 },
+  [{ title: 'Arrive Shimla', city_id: shimla }, { title: 'Kufri excursion' }, { title: 'Drive to Manali' }]])).id
+ok((await db.query(`select count(*)::int n from itinerary_days where itinerary_id=$1`, [itin])).rows[0].n === 3, 'itinerary saved with 3 days')
+await rejects(as(U2, `select public.save_itinerary($1,$2,$3)`, [org2, { title: 'x', route_id: route }, []]), "another company's route rejected")
+
+// 2 rooms × 4 nights @ 4,500 + 2 pax activity @ 1,500 + car 800 km @ 18 + 4 nights @ 300; 5% GST
+const items = [
+  { kind: 'hotel', day_no: 1, description: 'Snow View, Deluxe, CP', hotel_rate_id: rate, qty: 8, unit_cost: 380000, unit_price: 450000 },
+  { kind: 'activity', day_no: 3, description: 'Solang Valley', activity_rate_id: arate, qty: 2, unit_cost: 100000, unit_price: 150000 },
+  { kind: 'vehicle', description: 'Innova 800 km + 4 nights', vehicle_id: car, qty: 1, unit_cost: 1440000 + 120000, unit_price: 1800000 },
+]
+const qHeader = { quote_date: '2026-11-20', lead_id: lead, client_name: 'Ravi Kumar', party_ledger_id: cust, itinerary_id: itin,
+  route_id: route, package_title_id: title, meal_plan_id: cp, start_date: '2026-12-20', nights: 4, adults: 2, gst_rate: 5 }
+const q = (await one(U1, `select public.save_quotation($1,$2,$3) id`, [org1, qHeader, items])).id
+const Q = (await db.query(`select quote_no, cost_total, subtotal, markup, tax_total, grand_total from quotations where id=$1`, [q])).rows[0]
+ok(Q.quote_no === 'Q-0001' && Number(Q.subtotal) === 3600000 + 300000 + 1800000 && Number(Q.tax_total) === 285000 && Number(Q.grand_total) === 5985000,
+  `quotation ${Q.quote_no}: ₹${Number(Q.subtotal) / 100} + 5% = ₹${Number(Q.grand_total) / 100}, margin ₹${Number(Q.markup) / 100}`)
+await rejects(as(U1, `select public.save_quotation($1,$2,$3)`, [org1, qHeader, [{ ...items[0], qty: 0 }]]), 'zero-quantity item rejected')
+await rejects(as(U2, `select public.save_quotation($1,$2,$3)`, [org2, { client_name: 'x', quote_date: '2026-11-20' }, [{ ...items[0] }]]), "another company's hotel rate rejected")
+await one(U1, `select public.save_quotation($1,$2,$3) id`, [org1, { ...qHeader, id: q, gst_rate: 18 }, items.slice(0, 1)])
+ok(Number((await db.query(`select grand_total from quotations where id=$1`, [q])).rows[0].grand_total) === 4248000, 'editing a quotation recomputes totals')
+
+// proforma (not posted) -> invoice (posted)
+const pf = (await one(U1, `select public.save_invoice($1,$2,$3,false) id`, [org1,
+  { doc_kind: 'proforma', bill_type: 'tour', invoice_date: '2026-11-21', party_ledger_id: cust, place_of_supply_state_id: mh },
+  [{ service: 'tour', description: 'Himachal Delight', basic: 3600000, taxable: 3600000, gst_rate: 5, cgst: 90000, sgst: 90000, net_sale: 3780000, details: { gst_on: 'full' } }]])).id
+const PF = (await db.query(`select invoice_no, status from invoices where id=$1`, [pf])).rows[0]
+const pfEntries = (await db.query(`select count(*)::int n from ledger_entries where source_id=$1`, [pf])).rows[0].n
+ok(PF.invoice_no === 'PI-0001' && pfEntries === 0, `proforma ${PF.invoice_no} saved without touching the accounts`)
+const conv = (await one(U1, `select public.convert_proforma($1,$2,'2026-11-22') id`, [org1, pf])).id
+const CI = (await db.query(`select invoice_no, status, total from invoices where id=$1`, [conv])).rows[0]
+ok(CI.status === 'posted' && Number(CI.total) === 3780000, `proforma converted to posted invoice ${CI.invoice_no}`)
+await rejects(as(U1, `select public.convert_proforma($1,$2,'2026-11-22')`, [org1, pf]), 'a proforma converts only once')
+
+// hotel voucher
+const hv = (await one(U1, `select public.save_hotel_voucher($1,$2) id`, [org1, { voucher_date: '2026-11-22', party_ledger_id: cust, invoice_id: conv,
+  hotel_id: hotel, property_name: 'Snow View', guest_name: 'RAVI KUMAR', adults: 2, check_in: '2026-12-20', check_out: '2026-12-24', rooms: 1, meal_plan: 'CP' }])).id
+ok((await db.query(`select voucher_no from hotel_vouchers where id=$1`, [hv])).rows[0].voucher_no === 'HV-0001', 'hotel voucher HV-0001 saved')
+await rejects(as(U1, `select public.save_hotel_voucher($1,$2)`, [org1, { voucher_date: '2026-11-22', property_name: 'X', guest_name: 'Y', check_in: '2026-12-24', check_out: '2026-12-20' }]), 'check-out before check-in rejected')
+
 // --- guards
 await rejects(as(U1, `insert into ledger_entries (org_id,fy_id,entry_date,ledger_id,debit,source_type,source_id,doc_no) values ($1,$2,'2026-11-17',$3,1,'voucher',gen_random_uuid(),'x')`, [org1, fy, bank]), 'direct GL write blocked')
 ok((await as(U1, `delete from invoices where id=$1 returning id`, [inv])).rows.length === 0, 'posted invoice cannot be deleted')
