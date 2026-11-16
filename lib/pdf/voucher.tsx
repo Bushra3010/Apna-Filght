@@ -1,10 +1,7 @@
-import 'server-only'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { Page, Text, View } from '@react-pdf/renderer'
 import { formatAmount, formatINR } from '@/lib/money'
 import { amountInWords } from '@/lib/words'
 import { CompanyBlock, dateIN, KV, PageFooter, s, type Company } from './kit'
-import { loadCompany } from './invoice'
 
 const MODE: Record<string, string> = { cash: 'Cash', cheque: 'Cheque', bank_transfer: 'Bank transfer', upi: 'UPI', card: 'Card', gateway: 'Online', adjustment: 'Adjustment' }
 
@@ -14,23 +11,6 @@ export type VoucherData = {
     party: { name: string; address: string | null; gstin: string | null } | null; account: { name: string } | null }
   against: { no: string; date: string; amount: number }[]
   company: Company
-}
-
-export async function loadVoucher(supabase: SupabaseClient, orgId: string, id: string): Promise<VoucherData | null> {
-  const [{ data: v }, { data: alloc }, company] = await Promise.all([
-    supabase.from('vouchers')
-      .select('id, kind, voucher_no, voucher_date, amount, mode, reference, narration, cheque_no, cheque_date, cheque_bank, status, party:ledgers!vouchers_party_ledger_id_fkey(name, address, gstin), account:ledgers!vouchers_cash_bank_ledger_id_fkey(name)')
-      .eq('org_id', orgId).eq('id', id).in('kind', ['receipt', 'payment']).maybeSingle(),
-    supabase.from('bill_allocations').select('amount, invoices(invoice_no, invoice_date), purchase_bills(bill_no, bill_date)').eq('org_id', orgId).eq('voucher_id', id),
-    loadCompany(supabase, orgId),
-  ])
-  if (!v || !company) return null
-  const against = (alloc ?? []).map((a) => {
-    const inv = a.invoices as unknown as { invoice_no: string; invoice_date: string } | null
-    const pb = a.purchase_bills as unknown as { bill_no: string; bill_date: string } | null
-    return { no: inv?.invoice_no ?? pb?.bill_no ?? '', date: inv?.invoice_date ?? pb?.bill_date ?? '', amount: Number(a.amount) }
-  })
-  return { v: v as unknown as VoucherData['v'], against, company }
 }
 
 export function VoucherPage({ d }: { d: VoucherData }) {

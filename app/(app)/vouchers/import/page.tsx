@@ -1,7 +1,8 @@
 import { getContext } from '@/lib/context'
 import { PageHeader } from '@/components/page-header'
 import { Field, NativeSelect } from '@/components/form'
-import { ImportWizard, type SavedMapping } from '@/components/import-wizard'
+import { ImportWizard } from '@/components/import-wizard-lazy'
+import type { SavedMapping } from '@/components/import-wizard'
 import { VOUCHER_FIELDS } from '@/lib/import/fields'
 import { importVouchers } from './actions'
 

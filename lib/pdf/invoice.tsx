@@ -1,12 +1,10 @@
-import 'server-only'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { Page, Text, View } from '@react-pdf/renderer'
 import { formatAmount, formatINR } from '@/lib/money'
 import { amountInWords } from '@/lib/words'
 import { describeLine } from '@/lib/invoice'
-import { CompanyBlock, COMPANY_COLS, dateIN, KV, PageFooter, s, type Company } from './kit'
+import { CompanyBlock, dateIN, KV, PageFooter, s, type Company } from './kit'
 
-type Line = {
+export type Line = {
   id: string; service: string; pax_name: string | null; pax_type: string | null; description: string | null
   basic: number; xt: number; service_fee: number; other_charges: number; discount: number
   cgst: number; sgst: number; igst: number; gst_rate: number; net_sale: number
@@ -23,32 +21,6 @@ export type InvoiceData = {
   }
   lines: Line[]
   company: Company & { invoice_terms: string | null }
-}
-
-const INV_COLS = 'id, invoice_no, invoice_date, due_date, doc_kind, bill_type, is_interstate, taxable, cgst, sgst, igst, total, notes, contact_phone, party_ledger_id, ' +
-  'party:ledgers!invoices_party_ledger_id_fkey(name, gstin, address, mobile), pos:states!invoices_place_of_supply_state_id_fkey(name, gst_code), ref:ref_invoice_id(invoice_no, invoice_date)'
-
-export async function loadCompany(supabase: SupabaseClient, orgId: string) {
-  const { data } = await supabase.from('orgs').select(COMPANY_COLS).eq('id', orgId).single()
-  const c = data as unknown as (Company & { invoice_terms: string | null; states: Company['state'] }) | null
-  return c ? { ...c, state: c.states } : null
-}
-
-/** Invoices (any kind) with their lines, in the order of `ids`. */
-export async function loadInvoices(supabase: SupabaseClient, orgId: string, ids: string[]): Promise<InvoiceData[]> {
-  if (!ids.length) return []
-  const [{ data: invs }, { data: lines }, company] = await Promise.all([
-    supabase.from('invoices').select(INV_COLS).eq('org_id', orgId).in('id', ids),
-    supabase.from('invoice_lines').select('*, airlines(code)').eq('org_id', orgId).in('invoice_id', ids).order('sort'),
-    loadCompany(supabase, orgId),
-  ])
-  if (!company) return []
-  const byId = new Map((invs ?? []).map((i) => [(i as unknown as { id: string }).id, i]))
-  return ids.filter((id) => byId.has(id)).map((id) => ({
-    inv: byId.get(id) as unknown as InvoiceData['inv'],
-    lines: (lines ?? []).filter((l) => l.invoice_id === id) as Line[],
-    company,
-  }))
 }
 
 export function invoiceTitle(doc_kind: string, bill_type: string) {

@@ -1,21 +1,13 @@
-import 'server-only'
-import path from 'node:path'
 import { Font, StyleSheet, Text, View } from '@react-pdf/renderer'
 
-// Noto Sans (SIL OFL): "latin" has the letters, "latin-ext" has the ₹ sign; react-pdf falls back glyph by glyph.
-const dir = path.join(process.cwd(), 'assets/fonts')
+// Noto Sans (SIL OFL), served from public/fonts: "latin" has the letters, "latin-ext" has the ₹ sign;
+// react-pdf falls back glyph by glyph. PDFs are drawn in the browser, so the fonts load from the site.
 let registered = false
-export function registerFonts() {
+export function registerFonts(origin: string) {
   if (registered) return
-  for (const [family, subset] of [['Noto', 'latin'], ['NotoExt', 'latin-ext']] as const) {
-    Font.register({
-      family,
-      fonts: [
-        { src: path.join(dir, `noto-sans-${subset}-400-normal.woff`), fontWeight: 400 },
-        { src: path.join(dir, `noto-sans-${subset}-700-normal.woff`), fontWeight: 700 },
-      ],
-    })
-  }
+  const f = (k: string) => `${origin}/fonts/noto-sans-${k}-normal.woff`
+  Font.register({ family: 'Noto', fonts: [{ src: f('latin-400'), fontWeight: 400 }, { src: f('latin-700'), fontWeight: 700 }] })
+  Font.register({ family: 'NotoExt', fonts: [{ src: f('latin-ext-400'), fontWeight: 400 }, { src: f('latin-ext-700'), fontWeight: 700 }] })
   Font.registerHyphenationCallback((w) => [w]) // never split words
   registered = true
 }
@@ -54,8 +46,6 @@ export type Company = {
   state: { name: string; gst_code: string | null } | null
 }
 
-export const COMPANY_COLS = 'name, legal_name, address_line1, address_line2, pincode, mobile, email, gstin, invoice_terms, states(name, gst_code)'
-
 export function CompanyBlock({ c }: { c: Company }) {
   return (
     <View style={{ maxWidth: 300 }}>
@@ -88,5 +78,3 @@ export function PageFooter({ left }: { left: string }) {
 
 export const dateIN = (d: string | null | undefined) => (d ? new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '')
 
-/** A safe file name piece, e.g. INV-0001 */
-export const fileSafe = (v: string) => v.replace(/[^A-Za-z0-9_-]+/g, '-')

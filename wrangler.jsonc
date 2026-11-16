@@ -1,0 +1,13 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	// Cloudflare Worker that serves the app (built by `npm run cf:build`)
+	"main": ".open-next/worker.js",
+	"name": "apna-flight",
+	"compatibility_date": "2026-11-15",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"observability": { "enabled": true }
+}

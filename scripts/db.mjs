@@ -1,7 +1,8 @@
 // Applies supabase/migrations/*.sql to your Supabase database, in order, once each.
 //   npm run db:migrate   apply anything new
 //   npm run db:status    show what is applied and check the setup
-// Reads SUPABASE_DB_URL from .env.local. Applied migrations are recorded in
+// Reads SUPABASE_DB_URL from .env.db (or .env.local). .env.db is kept apart so the Cloudflare
+// build, which bundles .env.local, never ships the database address. Applied migrations are recorded in
 // supabase_migrations.schema_migrations, the same table the Supabase CLI uses,
 // so `supabase db push` will agree with this script later.
 import fs from 'node:fs'
@@ -11,7 +12,9 @@ import pg from 'pg'
 const root = path.join(import.meta.dirname, '..')
 
 function loadEnv() {
-  const file = path.join(root, '.env.local')
+  for (const name of ['.env.db', '.env.local']) loadFile(path.join(root, name))
+}
+function loadFile(file) {
   if (!fs.existsSync(file)) return
   for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
@@ -51,12 +54,12 @@ async function askHidden(question) {
 
 let url = process.env.SUPABASE_DB_URL
 if (!url || url.includes('your-project-ref')) {
-  console.error('Set SUPABASE_DB_URL in .env.local (Supabase → Connect → Session pooler connection string).')
+  console.error('Set SUPABASE_DB_URL in .env.db (Supabase → Connect → Session pooler connection string).')
   process.exit(1)
 }
 if (url.includes('[YOUR-PASSWORD]')) {
   if (!process.stdin.isTTY) {
-    console.error('SUPABASE_DB_URL still has [YOUR-PASSWORD]. Put the password in .env.local, or run this command in a terminal to be asked for it.')
+    console.error('SUPABASE_DB_URL still has [YOUR-PASSWORD]. Put the password in .env.db, or run this command in a terminal to be asked for it.')
     process.exit(1)
   }
   const pw = await askHidden('Supabase database password (typing is hidden): ')

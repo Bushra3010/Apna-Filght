@@ -1,13 +1,10 @@
-import 'server-only'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { Page, Text, View } from '@react-pdf/renderer'
 import { formatINR } from '@/lib/money'
 import { CompanyBlock, dateIN, KV, PageFooter, s, type Company } from './kit'
-import { loadCompany } from './invoice'
 
 const KIND: Record<string, string> = { hotel: 'Accommodation', activity: 'Sightseeing & activities', vehicle: 'Transport', flight: 'Flights', visa: 'Visa', insurance: 'Insurance', other: 'Other' }
 
-type Q = {
+export type Q = {
   quote_no: string; quote_date: string; valid_until: string | null; client_name: string; start_date: string | null; nights: number | null
   adults: number; children: number; infants: number; subtotal: number; tax_total: number; gst_rate: number; grand_total: number
   inclusions: string | null; exclusions: string | null; terms: string | null; itinerary_id: string | null
@@ -18,19 +15,6 @@ export type QuotationData = {
   items: { kind: string; description: string }[]
   days: { day_no: number; title: string; description: string | null; cities: { name: string } | null }[]
   company: Company
-}
-
-export async function loadQuotation(supabase: SupabaseClient, orgId: string, id: string): Promise<QuotationData | null> {
-  const [{ data: q }, { data: items }, company] = await Promise.all([
-    supabase.from('quotations').select('*, routes(name), ptitle:lookups!quotations_package_title_id_fkey(name), meal:lookups!quotations_meal_plan_id_fkey(name)').eq('org_id', orgId).eq('id', id).maybeSingle(),
-    supabase.from('quotation_items').select('kind, description').eq('quotation_id', id).order('day_no', { nullsFirst: false }).order('sort'),
-    loadCompany(supabase, orgId),
-  ])
-  if (!q || !company) return null
-  const { data: days } = q.itinerary_id
-    ? await supabase.from('itinerary_days').select('day_no, title, description, cities(name)').eq('itinerary_id', q.itinerary_id).order('day_no')
-    : { data: [] }
-  return { q: q as Q, items: items ?? [], days: (days ?? []) as unknown as QuotationData['days'], company }
 }
 
 function H({ children }: { children: string }) {
