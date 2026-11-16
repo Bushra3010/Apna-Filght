@@ -7,7 +7,7 @@ import {
   Building2, Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
   Luggage, Map as MapIcon, NotebookPen, PieChart, Plane, Receipt, ReceiptIndianRupee, Route, Scale, ScrollText,
   Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, Gauge, Shuffle, Bell, UsersRound, PlaneTakeoff,
-  type LucideIcon,
+  FileUp, Printer, MessageCircle, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +43,8 @@ export const SECTIONS: Section[] = [
       { href: '/billing/proformas', label: 'Proformas', icon: Ticket },
       { href: '/billing/credit-notes', label: 'Credit notes', icon: FileMinus },
       { href: '/billing/hotel-vouchers', label: 'Hotel vouchers', icon: BedDouble },
+      { href: '/billing/import', label: 'Import', icon: FileUp },
+      { href: '/billing/print', label: 'Bulk print', icon: Printer },
     ],
   },
   {
@@ -95,6 +97,7 @@ export const SECTIONS: Section[] = [
     items: [
       { href: '/settings/company', label: 'Company', icon: Settings },
       { href: '/settings/team', label: 'Team', icon: UsersRound },
+      { href: '/settings/messages', label: 'WhatsApp messages', icon: MessageCircle },
       { href: '/settings/companies', label: 'Companies', icon: Building2 },
       { href: '/settings/years', label: 'Financial years', icon: CalendarRange },
     ],

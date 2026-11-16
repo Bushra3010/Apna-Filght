@@ -3,7 +3,7 @@
 Travel ERP + CRM for Indian travel agencies: leads and follow-ups, flight invoices with GST,
 receipts, double-entry accounts and ledger statements. Built with Next.js and Supabase.
 
-**What's in it (Milestones 1–5):**
+**What's in it (Milestones 1–6):**
 - **CRM:** leads with services, pax, source, assignment, status and follow-ups → quotation → proforma → invoice.
 - **Holiday packages:** hotels with dated room rates (class, room category, meal plan), activity rates,
   vehicles priced per km, routes, policies, and day-wise itineraries. The quotation builder prices a
@@ -32,6 +32,15 @@ receipts, double-entry accounts and ledger statements. Built with Next.js and Su
 - **Companies:** several companies per login (Settings → Companies).
 - **Masters:** ledgers, passengers (passport expiry flags), pick-lists (booked by, meal plans…).
 - **Dashboard:** sales, margin, receivable, receipts, monthly sales chart, receivable ageing.
+- **Imports (CSV / Excel):** booking reports from airline portals or a GDS become invoices (grouped
+  by PNR, tickets already invoiced skipped, missing clients optionally created); bank statements become
+  receipts or payments (references already entered skipped); ledgers from Tally or a sheet, with opening
+  balances. Columns are matched automatically and each file format can be saved. Every import is
+  checked row by row before anything is saved.
+- **PDFs:** server-made PDFs of invoices, credit notes, proformas, quotations, receipts and payment
+  vouchers, plus bulk printing of a date range into one PDF.
+- **WhatsApp:** one tap opens WhatsApp with the invoice, payment reminder, receipt or quotation message
+  typed in; the wording is editable under Settings → WhatsApp messages.
 
 ## Run it locally
 
@@ -61,7 +70,7 @@ Requires Node.js 22+ (see `.nvmrc`).
 ## Checks
 
 ```bash
-npm test            # unit tests (GST maths, GST returns, statements) + database tests
+npm test            # unit tests (GST maths, GST returns, statements, import parsing) + database tests
 npm run typecheck
 npm run lint
 npm run build
@@ -75,6 +84,8 @@ app/onboarding      first-run company setup
 app/(app)           dashboard, crm/leads, billing/invoices, vouchers/receipts,
                     accounts/ledger, masters/ledgers, settings/company
 lib/                supabase clients, context (company + financial year), gst, money, words
+lib/import          spreadsheet parsing, column matching, import batches
+lib/pdf             PDF documents (@react-pdf/renderer, Noto Sans from assets/fonts, SIL OFL)
 supabase/migrations schema + RLS, app RPCs, reference data (states with GST codes, airlines, cities)
 tests/db.test.mjs   database test suite
 replica/            recon map, feature checklist, architecture and build plan

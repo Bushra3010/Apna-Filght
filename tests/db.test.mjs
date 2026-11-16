@@ -374,6 +374,16 @@ ok(al.some((a) => a.kind === 'pending_purchase' && a.doc_no === 'INV-0003') && a
 const tb3 = (await one(U1, `select sum(closing)::bigint s from app.ledger_balances($1,$2,'2026-04-01','2027-03-31')`, [org1, fy])).s
 ok(Number(tb3) === 0, 'trial balance still nets to zero after M5 transactions')
 
+// --- M6: import formats, import history, WhatsApp templates
+await as(U1, `insert into import_mappings (org_id, target, name, mapping) values ($1, 'billing', 'Portal export', '{"pax_name":"Pax Name"}')`, [org1])
+ok((await as(U2, `select 1 from import_mappings where org_id=$1`, [org1])).rows.length === 0, "another company's saved import formats are hidden")
+await rejects(as(U1, `insert into import_mappings (org_id, target, name) values ($1, 'billing', 'Portal export')`, [org1]), 'import format names are unique per target')
+const ib = await one(U1, `insert into import_batches (org_id, target, format, file_name, row_count, status) values ($1, 'billing', 'Portal export', 'tickets.csv', 2, 'partially_generated') returning id`, [org1])
+await as(U1, `insert into import_rows (org_id, batch_id, row_no, raw, invoice_id) values ($1, $2, 1, '{}', $3), ($1, $2, 2, '{}', null)`, [org1, ib.id, inv])
+ok((await as(U2, `select 1 from import_rows where org_id=$1`, [org1])).rows.length === 0, 'import history needs no file path and is private to the company')
+await as(U1, `insert into message_templates (org_id, doc_type, channel, body) values ($1, 'invoice', 'whatsapp', 'Hi {client}') on conflict (org_id, doc_type, channel) do update set body = excluded.body`, [org1])
+await rejects(as(U2, `update message_templates set body='x' where org_id=$1 returning id`, [org1]).then((r) => { if (!r.rows.length) throw new Error('blocked') }), "another company's WhatsApp messages cannot be changed")
+
 // --- guards
 await rejects(as(U1, `insert into ledger_entries (org_id,fy_id,entry_date,ledger_id,debit,source_type,source_id,doc_no) values ($1,$2,'2026-11-17',$3,1,'voucher',gen_random_uuid(),'x')`, [org1, fy, bank]), 'direct GL write blocked')
 ok((await as(U1, `delete from invoices where id=$1 returning id`, [inv])).rows.length === 0, 'posted invoice cannot be deleted')

@@ -6,6 +6,8 @@ import { amountInWords } from '@/lib/words'
 import { describeLine } from '@/lib/invoice'
 import { LinkButton } from '@/components/link-button'
 import { PrintButton } from '@/components/print-button'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { fillTemplate, templateFor } from '@/lib/messages'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +37,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
     supabase.from('invoices').select('id, invoice_no, invoice_date, total').eq('ref_invoice_id', id).eq('doc_kind', 'credit_note').order('invoice_date'),
   ])
   if (!inv) notFound()
+  const { data: tpl } = await supabase.from('message_templates').select('doc_type, body').eq('org_id', org.id).eq('channel', 'whatsapp')
   const b = bal as Bal | null
   const party = inv.party as unknown as Party
   const pos = inv.pos as unknown as { name: string; gst_code: string } | null
@@ -51,6 +54,14 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   const hasXt = lines?.some((l) => Number(l.xt) !== 0)
   const title = isCN ? 'CREDIT NOTE' : isPf ? 'PROFORMA INVOICE' : noGst ? 'BILL OF SUPPLY' : 'TAX INVOICE'
   const date = (d: string) => new Date(d).toLocaleDateString('en-IN', { dateStyle: 'medium' })
+  const trip = lines?.find((l) => l.sector || l.travel_date)
+  const msgVars = {
+    client: party.name, doc_no: inv.invoice_no, date: date(inv.invoice_date), amount: formatINR(inv.total),
+    balance: formatINR(Math.max(0, Number(b?.balance ?? inv.total))), due_date: inv.due_date ? `, due ${date(inv.due_date)}` : '',
+    travel: trip ? [[trip.sector, trip.travel_date && `on ${date(trip.travel_date)}`].filter(Boolean).join(' '), trip.pnr && `PNR ${trip.pnr}`].filter(Boolean).join(', ') : '',
+    company: company?.legal_name || company?.name || '',
+  }
+  const phone = inv.contact_phone || party.mobile
 
   return (
     <>
@@ -69,6 +80,9 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         </div>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
+          <LinkButton href={`/billing/invoices/${inv.id}/pdf`} external variant="outline">PDF</LinkButton>
+          {!isCN && <WhatsAppButton phone={phone} text={fillTemplate(templateFor(tpl, 'invoice'), msgVars)} />}
+          {!isCN && !isPf && b && Number(b.balance) > 0 && <WhatsAppButton phone={phone} label="Remind" text={fillTemplate(templateFor(tpl, 'reminder'), msgVars)} />}
           {inv.bill_type === 'hotel' && !isCN && !isPf && <LinkButton href={`/billing/hotel-vouchers/new?invoice=${inv.id}`} variant="outline">Hotel voucher</LinkButton>}
           {!isCN && !conv && <LinkButton href={`/billing/invoices/${inv.id}/edit`} variant="outline">Edit</LinkButton>}
           {isPf && !conv && (

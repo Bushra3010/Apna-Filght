@@ -6,6 +6,8 @@ import { QUOTE_STATUSES } from '@/lib/quotation'
 import { label } from '@/lib/leads'
 import { LinkButton } from '@/components/link-button'
 import { PrintButton } from '@/components/print-button'
+import { WhatsAppButton } from '@/components/whatsapp-button'
+import { fillTemplate, templateFor } from '@/lib/messages'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { setQuotationStatus } from '../actions'
@@ -24,6 +26,10 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
     supabase.from('invoices').select('id, invoice_no, doc_kind').eq('quotation_id', id),
   ])
   if (!q) notFound()
+  const [{ data: tpl }, { data: contact }] = await Promise.all([
+    supabase.from('message_templates').select('doc_type, body').eq('org_id', org.id).eq('channel', 'whatsapp'),
+    q.lead_id ? supabase.from('leads').select('phone').eq('id', q.lead_id).maybeSingle() : q.party_ledger_id ? supabase.from('ledgers').select('phone:mobile').eq('id', q.party_ledger_id).maybeSingle() : Promise.resolve({ data: null }),
+  ])
   const { data: days } = q.itinerary_id
     ? await supabase.from('itinerary_days').select('day_no, title, description, cities(name)').eq('itinerary_id', q.itinerary_id).order('day_no')
     : { data: [] }
@@ -47,6 +53,14 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
         </div>
         <div className="flex flex-wrap gap-2">
           <PrintButton />
+          <LinkButton href={`/crm/quotations/${q.id}/pdf`} external variant="outline">PDF</LinkButton>
+          <WhatsAppButton
+            phone={(contact as { phone: string | null } | null)?.phone}
+            text={fillTemplate(templateFor(tpl, 'quotation'), {
+              client: q.client_name, doc_no: q.quote_no, package: n(q.ptitle) || n(q.routes) || 'your trip', amount: formatINR(q.grand_total),
+              valid_until: q.valid_until ? `, valid until ${dt(q.valid_until)}` : '', company: company?.legal_name || company?.name || '',
+            })}
+          />
           <LinkButton href={`/crm/quotations/${q.id}/edit`} variant="outline">Edit</LinkButton>
           {q.party_ledger_id ? (
             <LinkButton href={`/billing/proformas/new?quotation=${q.id}`}>Make proforma</LinkButton>

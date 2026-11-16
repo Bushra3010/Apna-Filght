@@ -50,7 +50,7 @@ export async function VoucherList({ kind, saved }: { kind: 'payment' | 'contra' 
               const cr = kind === 'journal' ? lines.filter((l) => l.credit > 0).map((l) => l.ledgers?.name).join(', ') : null
               return (
                 <TableRow key={r.id} className={r.id === saved ? 'bg-primary/5' : undefined}>
-                  <TableCell className="font-medium">{r.voucher_no}</TableCell>
+                  <TableCell className="font-medium">{kind === 'payment' ? <a href={`/vouchers/${r.id}/pdf`} target="_blank" rel="noopener" title="Voucher PDF" className="hover:underline">{r.voucher_no}</a> : r.voucher_no}</TableCell>
                   <TableCell>{new Date(r.voucher_date).toLocaleDateString('en-IN')}</TableCell>
                   <TableCell>{dr ?? (party && <Link href={`/accounts/ledger?ledger=${party.id}`} className="hover:underline">{party.name}</Link>)}</TableCell>
                   <TableCell>{cr ?? account?.name}</TableCell>

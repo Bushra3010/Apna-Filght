@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { getContext } from '@/lib/context'
 import { friendlyError } from '@/lib/errors'
+import { LEDGER_GROUP } from '@/lib/ledgers'
 import type { FormState } from '@/components/form'
 
 const opt = z.string().trim().transform((v) => (v === '' ? null : v))
@@ -24,18 +25,6 @@ const Schema = z.object({
   credit_days: z.coerce.number().int().min(0).max(365),
 })
 
-// which account group each kind of ledger belongs to
-const GROUP_FOR: Record<string, string> = {
-  customer: 'sundry_debtors',
-  supplier: 'sundry_creditors',
-  bank: 'bank_accounts',
-  cash: 'cash',
-  income: 'indirect_income',
-  expense: 'indirect_expense',
-  capital: 'capital',
-  other: 'current_assets',
-}
-
 export async function saveLedger(_: FormState, form: FormData): Promise<FormState> {
   const raw = Object.fromEntries(form)
   const parsed = Schema.safeParse({ ...raw, gstin: String(raw.gstin ?? '').toUpperCase(), pan: String(raw.pan ?? '').toUpperCase() })
@@ -47,7 +36,7 @@ export async function saveLedger(_: FormState, form: FormData): Promise<FormStat
     .from('account_groups')
     .select('id')
     .eq('org_id', org.id)
-    .eq('system_key', GROUP_FOR[data.kind])
+    .eq('system_key', LEDGER_GROUP[data.kind])
     .single()
   if (!group) return { error: 'Account group missing for this company' }
 

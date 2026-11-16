@@ -9,15 +9,24 @@ const root = path.join(import.meta.dirname, '..')
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'apna-unit-'))
 execFileSync(path.join(root, 'node_modules/.bin/tsc'), [
   'lib/gst.ts', 'lib/gst-returns.ts', 'lib/statements.ts', 'lib/words.ts', 'lib/next-path.ts',
-  '--outDir', out, '--module', 'es2022', '--target', 'es2022', '--skipLibCheck',
+  'lib/import/values.ts', 'lib/import/fields.ts', 'lib/messages.ts',
+  '--outDir', out, '--rootDir', 'lib', '--module', 'es2022', '--target', 'es2022', '--skipLibCheck',
 ], { cwd: root, stdio: 'inherit' })
-for (const f of fs.readdirSync(out)) fs.renameSync(path.join(out, f), path.join(out, f.replace(/\.js$/, '.mjs')))
+// .js → .mjs (and relative imports with it) so Node loads them as ES modules
+for (const f of fs.readdirSync(out, { recursive: true }).filter((f) => f.endsWith('.js'))) {
+  const src = fs.readFileSync(path.join(out, f), 'utf8').replace(/(from\s+['"]\.{1,2}\/[^'"]+?)(['"])/g, '$1.mjs$2')
+  fs.writeFileSync(path.join(out, f.replace(/\.js$/, '.mjs')), src)
+  fs.rmSync(path.join(out, f))
+}
 const imp = (f) => import(path.join(out, f))
 const { computeLine } = await imp('gst.mjs')
 const { buildGstr1, gstr1Json, buildGstr3b } = await imp('gst-returns.mjs')
 const { profitAndLoss, balanceSheet } = await imp('statements.mjs')
 const { amountInWords } = await imp('words.mjs')
 const { safeNext } = await imp('next-path.mjs')
+const { parseDate, parseMoney } = await imp('import/values.mjs')
+const { guessMapping, BILLING_FIELDS, VOUCHER_FIELDS } = await imp('import/fields.mjs')
+const { fillTemplate, waNumber, waLink } = await imp('messages.mjs')
 
 let bad = 0
 const ok = (v, m) => { console.log(v ? 'PASS' : 'FAIL', m); if (!v) bad++ }
@@ -84,6 +93,26 @@ ok(bs.diff === 0 && bs.totalAssets === 500 && bs.totalLiab === 500, 'balance she
 // --- sign-in redirect only to our own pages
 ok(safeNext('/invite/abc') === '/invite/abc' && safeNext('/billing/invoices?x=1') === '/billing/invoices?x=1', 'post-login redirect keeps same-site paths')
 ok([ '//evil.com', 'https://evil.com', '/\\evil.com', 'javascript:alert(1)', '', null ].every((v) => safeNext(v) === null), 'post-login redirect refuses other sites')
+
+// --- import: cell values
+ok(['2026-11-17', '17/11/2026', '17-11-26', '17.11.2026', '17-Nov-2026', '17 Nov 26', '17Nov2026', '46343'].every((v) => parseDate(v) === '2026-11-17'), 'import dates: ISO, dd/mm/yyyy, dd-MMM-yy, Excel serial')
+ok(parseDate('31/02/2026') === null && parseDate('11/31/2026') === null && parseDate('soon') === null && parseDate('') === null, 'import dates: impossible dates rejected (day first)')
+ok(parseMoney('₹ 1,23,456.50') === '123456.50' && parseMoney('Rs.500') === '500.00' && parseMoney('(200)') === '-200.00' && parseMoney(99.5) === '99.50', 'import money: rupee sign, Indian commas, brackets')
+ok(parseMoney('') === '' && parseMoney('-') === '' && parseMoney('abc') === null && parseMoney('12.3.4') === null, 'import money: blank vs invalid')
+
+// --- import: column guessing
+{
+  const m = guessMapping(['Pax Name', 'PNR No', 'Ticket Number', 'Base Fare', 'YQ/Taxes', 'Sector', 'Issue Date', 'Customer'], BILLING_FIELDS)
+  ok(m.pax_name === 'Pax Name' && m.pnr === 'PNR No' && m.ticket_no === 'Ticket Number' && m.basic === 'Base Fare' && m.client === 'Customer', 'import: guesses common booking-report headers')
+  ok(new Set(Object.values(m)).size === Object.values(m).length, 'import: each column used for one field only')
+  const v = guessMapping(['Txn Date', 'Party Name', 'Amount (INR)', 'UTR No'], VOUCHER_FIELDS)
+  ok(v.date === 'Txn Date' && v.party === 'Party Name' && v.amount === 'Amount (INR)' && v.reference === 'UTR No', 'import: guesses bank-statement headers')
+}
+
+// --- WhatsApp messages
+ok(fillTemplate('Dear {client},\n\n{travel}\n\nThanks {unknown}', { client: 'Asha', travel: '' }) === 'Dear Asha,\n\nThanks {unknown}', 'messages: placeholders filled, empty lines tidied, unknown left')
+ok(waNumber('98765 43210') === '919876543210' && waNumber('+91-98765-43210') === '919876543210' && waNumber('098765 43210') === '919876543210' && waNumber('12345') === null, 'messages: Indian mobile numbers for wa.me')
+ok(waLink(null, 'a b&c') === 'https://wa.me/?text=a%20b%26c', 'messages: wa.me link without a number, text encoded')
 
 // --- client boundary: server files must not import non-component values from 'use client' files
 // (on the server those imports are placeholders, e.g. an array becomes something without .map)

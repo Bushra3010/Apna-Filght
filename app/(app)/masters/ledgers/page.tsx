@@ -28,7 +28,7 @@ export default async function LedgersPage({ searchParams }: { searchParams: Prom
       <PageHeader
         title="Ledgers"
         description="Clients, suppliers, bank and cash accounts"
-        actions={<LinkButton href="/masters/ledgers/new">New ledger</LinkButton>}
+        actions={<><LinkButton href="/masters/ledgers/import" variant="outline">Import</LinkButton><LinkButton href="/masters/ledgers/new">New ledger</LinkButton></>}
       />
       <form className="mb-4 flex flex-wrap gap-2">
         <Input name="q" defaultValue={q} placeholder="Search by name" className="max-w-xs" />

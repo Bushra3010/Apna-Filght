@@ -174,9 +174,12 @@ purchase registers, group purchase, multi-line vouchers, year close & balance tr
 **M5 — Team & insight** ✅ (plus group/FD purchases and batch receipts/payments)
 Roles & permissions UI, user hierarchy, CRM dashboard, alerts, mobile layout.
 
-**M6 — Integrations**
-Excel imports (billing, vouchers, ledgers), payment links + webhook, e-invoice IRN, bulk printing,
-message templates, voucher renumbering.
+**M6 — Integrations** (part 1 ✅)
+Done: CSV/Excel imports (bookings → invoices, bank statements → receipts/payments, ledgers) with
+column matching, saved formats, a dry run and import history; server PDFs (react-pdf) and bulk
+printing; WhatsApp share with editable templates. Skipped: voucher renumbering (breaks the audit
+trail). Waiting on accounts: email (provider + sending domain), payment links + webhook (gateway
+account), e-invoice IRN (GSP; only needed above ₹5 crore turnover).
 
 ## 6. Repository layout (planned)
 

@@ -10,7 +10,7 @@ F08,Masters,Ledgers (clients / suppliers / bank / cash / expense) with GSTIN and
 F09,Masters,Passengers with documents,should,M2,"partial: passengers + passport expiry; document uploads in M3"
 F10,Masters,Airlines / sectors / countries / states / cities (seeded),must,M1,done
 F11,Masters,Small lookups: booked by / service type / visa type / room type / room category / taxi type / meal plan / package type / follow-up action / package class / destination / bank name,must,M2,done
-F12,Masters,Excel import for ledgers,could,M6,todo
+F12,Masters,Excel import for ledgers,could,M6,"done: CSV/xlsx, type/state/GSTIN/opening balance, existing names skipped"
 F13,CRM,Leads list with filters / status chips / search,must,M1,done
 F14,CRM,New / edit lead with services / pax / source / budget,must,M1,done
 F15,CRM,Follow-ups with action / date / time slot; today and overdue lists,must,M2,"partial: schedule + mark done; reminders in M2"
@@ -18,28 +18,28 @@ F16,CRM,Lead assignment / transfer between users,should,M2,done
 F17,CRM,User hierarchy (reporting managers; self & team view),should,M5,done
 F18,CRM,CRM dashboard: funnel / pendency ageing / proposal value buckets / trips,should,M5,done
 F19,CRM,Itinerary master with day-wise plan and policies,should,M3,done
-F20,CRM,B2C quotation built from itinerary + hotel / activity / vehicle rates; print/PDF; accept,must,M3,"partial: build from rates, markup, GST, print, accept/reject; PDF email in M6"
+F20,CRM,B2C quotation built from itinerary + hotel / activity / vehicle rates; print/PDF; accept,must,M3,"done: build from rates, markup, GST, print, PDF, WhatsApp, accept/reject (email needs a provider)"
 F21,CRM,Hotel master + hotel rate master (class / room category / meal plan / date ranges),should,M3,done
 F22,CRM,Activity rates / vehicle rates / additional services,should,M3,"partial: activity rates and vehicles; additional hotel/taxi services as pick-lists"
 F23,CRM,Routes / destinations / package titles and classes,should,M3,done
 F24,CRM,Convert lead -> quotation -> proforma -> invoice,must,M1/M3,done
 F25,Billing,Invoice: all 10 types with header / lines / sale+purchase per line,must,M1 (Domestic) / M2 (rest),done
 F26,Billing,Automatic GST split (CGST+SGST vs IGST) from place of supply,must,M1,done
-F27,Billing,Invoice print / PDF / email,must,M2,"partial: print/PDF via browser; emailing in M6"
+F27,Billing,Invoice print / PDF / email,must,M2,"partial: print + server PDF + WhatsApp share; emailing needs a provider"
 F28,Billing,Cancellation / credit note with charges and refund,must,M2,done
 F29,Billing,Proforma invoice,must,M3,done
 F30,Billing,Hotel / cruise voucher with print,should,M3,done
-F31,Billing,Multiple printing (bulk PDF),could,M6,todo
+F31,Billing,Multiple printing (bulk PDF),could,M6,"done: date range / kind / client into one PDF (150 max)"
 F32,Billing,E-invoice (IRN) via GSP API,could,M6,todo
 F33,Billing,Online payment link (Razorpay or Cashfree official API) + webhook to receipt,should,M6,todo
 F34,Purchase,General purchase bill,must,M2,done
 F35,Purchase,Group purchase / fixed departure with pax allocation,should,M5,done
-F36,Purchase,Excel import of supplier / GDS booking reports -> invoices,should,M6,todo
-F37,Purchase,Pending purchase / pending billing lists,should,M5,"partial: pending purchase in Alerts; pending billing needs imports (M6)"
+F36,Purchase,Excel import of supplier / GDS booking reports -> invoices,should,M6,"done: column matching + saved formats, dry run, PNR grouping, duplicate tickets skipped, purchase cost per line"
+F37,Purchase,Pending purchase / pending billing lists,should,M5,"done: pending purchase in Alerts; bookings imported from reports"
 F38,Vouchers,Receipt / payment / contra / journal,must,M1 (receipt) / M2,done
 F39,Vouchers,Multi-line receipt / payment,should,M5,done
 F40,Vouchers,Bill adjustment (allocate receipts to invoices),must,M2,done
-F41,Vouchers,Excel import of vouchers / gateway receipts,could,M6,todo
+F41,Vouchers,Excel import of vouchers / gateway receipts,could,M6,"done: bank statement → receipts/payments on account, duplicate references skipped"
 F42,Accounts,Ledger statement,must,M1,done
 F43,Accounts,Cash book / bank book / day book,must,M2,done
 F44,Accounts,Trial balance (opening + period) with group drill-down,must,M4,done
@@ -51,6 +51,6 @@ F49,Reports,Sales register with KPIs / margin by type / top parties / Excel expo
 F50,Reports,Purchase register / purchase return,should,M4,done
 F51,Alerts,Invalid GST / loss-making invoices & credit notes / sale-purchase mismatches,should,M5,done
 F52,Dashboard,ERP dashboard: sales / receivable / payable / cash / bank / monthly chart / ageing / next 5 days,must,M2,done
-F53,Platform,Message templates (email/WhatsApp text) for documents,could,M6,todo
-F54,Platform,Voucher renumbering,could,M6,todo
+F53,Platform,Message templates (email/WhatsApp text) for documents,could,M6,"partial: WhatsApp (wa.me) templates for invoice, reminder, receipt, quotation; email needs a provider"
+F54,Platform,Voucher renumbering,could,M6,"skipped: renumbering posted documents breaks the audit trail and GST filings"
 F55,Platform,Mobile-friendly layout with bottom nav,should,M5,done

@@ -42,7 +42,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Invoices" description={`FY ${fy.label}`} actions={<LinkButton href="/billing/invoices/new">New invoice</LinkButton>} />
+      <PageHeader title="Invoices" description={`FY ${fy.label}`} actions={<><LinkButton href="/billing/import" variant="outline">Import</LinkButton><LinkButton href="/billing/invoices/new">New invoice</LinkButton></>} />
       <form className="mb-4 flex flex-wrap items-end gap-2">
         <label className="grid gap-1 text-xs text-muted-foreground">From<Input type="date" name="from" defaultValue={from} /></label>
         <label className="grid gap-1 text-xs text-muted-foreground">To<Input type="date" name="to" defaultValue={to} /></label>
