@@ -67,6 +67,23 @@ Requires Node.js 22+ (see `.nvmrc`).
    ```
    Open http://localhost:3000, create an account and set up your company.
 
+## Deploy (Cloudflare Workers)
+
+Live at https://apna-flight.apnaflighttour.workers.dev (Cloudflare free plan; config in
+`wrangler.jsonc` and `open-next.config.ts`, built with OpenNext).
+
+```bash
+npx wrangler login     # once, approve in the browser
+npm run cf:preview     # optional: run the built Worker locally on :8787
+npm run cf:deploy      # build and publish
+```
+
+Wrangler needs Node.js 22+. The build bundles `.env.local` into the Worker, so keep only the two
+public Supabase values there (the database URL for migrations lives in `.env.db`). After changing
+the live address, update Supabase → Authentication → URL Configuration (Site URL and the
+`/auth/callback` redirect URL). PDFs are drawn in the browser: Workers can't run react-pdf's layout
+engine, and keeping it client-side keeps the Worker under the free plan's 3 MB limit.
+
 ## Checks
 
 ```bash
