@@ -3,10 +3,19 @@
 Travel ERP + CRM for Indian travel agencies: leads and follow-ups, flight invoices with GST,
 receipts, double-entry accounts and ledger statements. Built with Next.js and Supabase.
 
-**Milestone 1 (this version):** sign up → set up company → add clients/suppliers/bank → capture a
-lead with follow-ups → invoice it (domestic or international flight, CGST+SGST or IGST worked out
-from place of supply, sale + purchase + margin per passenger) → print → record the receipt and
-adjust it against the invoice → see it all in the ledger statement and dashboard.
+**What's in it (Milestones 1–2):**
+- **CRM:** leads with services, pax, source, assignment, status and follow-ups → one click to invoice.
+- **Billing:** all 10 invoice types (domestic / international flight, hotel, visa / insurance,
+  train / bus, taxi, misc service, bill of supply, tour package, commission). GST on the service
+  charge or the full value, CGST+SGST or IGST from place of supply, sale + purchase + margin per line.
+  Printable tax invoice / bill of supply with amount in words.
+- **Cancellations:** credit notes from an invoice — partial refunds, supplier refunds, your
+  cancellation charges with GST (posted to their own income ledger), refund-due tracking.
+- **Purchases:** general purchase bills (rent, utilities…) with input GST and TDS.
+- **Vouchers:** receipts and payments with bill-wise adjustment, contra, journal.
+- **Accounts:** ledger statement, cash book, bank book, day book — all double-entry.
+- **Masters:** ledgers, passengers (passport expiry flags), pick-lists (booked by, meal plans…).
+- **Dashboard:** sales, margin, receivable, receipts, monthly sales chart, receivable ageing.
 
 ## Run it locally
 
@@ -20,7 +29,7 @@ Requires Node.js 22+ (see `.nvmrc`).
    npx supabase link --project-ref <your-project-ref>
    npx supabase db push
    ```
-   or open the project's **SQL Editor** and run the three files in `supabase/migrations/` in order.
+   or open the project's **SQL Editor** and run every file in `supabase/migrations/` in name order.
 3. **Auth settings** (Supabase → Authentication → URL Configuration): set Site URL to
    `http://localhost:3000` and add `http://localhost:3000/auth/callback` to Redirect URLs.
    (Add your production URL too when you deploy.)

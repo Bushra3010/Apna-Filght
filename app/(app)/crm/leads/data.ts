@@ -12,3 +12,9 @@ export async function getParties(kind: 'customer' | 'supplier' = 'customer') {
     .order('name')
   return (data ?? []) as { id: string; name: string; state_id: string | null; mobile: string | null }[]
 }
+
+export async function getMembers() {
+  const { supabase, org } = await getContext()
+  const { data } = await supabase.from('org_members').select('id, display_name').eq('org_id', org.id).eq('is_active', true).order('display_name')
+  return (data ?? []) as { id: string; display_name: string }[]
+}

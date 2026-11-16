@@ -34,7 +34,7 @@ One database, one app. No microservices.
 ## 2. Data model
 
 `supabase/migrations/` — **43 tables, 2 views, posting + RPC functions**, tested on real Postgres
-(`npm run test:db`, 32 checks).
+(`npm run test:db`, 53 checks).
 
 | Area | Tables |
 |---|---|
@@ -158,9 +158,10 @@ GST → post → receipt → ledger statement shows the balance going to zero.
 Screens: login, org setup, ledgers, leads list/form, invoice list/form (Domestic), receipt, ledger report.
 Features: F01–F03, F05–F08, F10, F13–F14, F24 (lead→invoice), F25 (domestic), F26, F38 (receipt), F42.
 
-**M2 — Daily operations**
-All 10 invoice types, credit notes, PDF + email, follow-ups, lead assignment, payment/contra/journal,
-bill adjustment, general purchase, cash/bank/day book, lookups, passengers, ERP dashboard.
+**M2 — Daily operations** ✅
+All 10 invoice types, credit notes (with cancellation charges), lead assignment, payment/contra/journal,
+bill-wise adjustment, general purchase, cash/bank/day book, lookups, passengers, dashboard charts.
+(Server-side PDF + email moved to M6 with the other integrations; browser print/PDF works today.)
 
 **M3 — Holiday packages (CRM depth)**
 Itineraries, policies, hotels + rates, activities, vehicles, routes, quotation builder with print,

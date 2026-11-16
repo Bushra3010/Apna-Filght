@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { FOLLOWUP_ACTIONS, LEAD_STATUSES, istDateTime, label, statusTone } from '@/lib/leads'
 import { formatINR } from '@/lib/money'
 import { LeadForm, type LeadRow } from '../lead-form'
-import { getParties } from '../data'
+import { getMembers, getParties } from '../data'
 import { completeFollowup } from '../actions'
 
 export const metadata = { title: 'Lead' }
@@ -37,7 +37,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <LeadForm lead={lead as LeadRow} parties={await getParties()} />
+        <LeadForm lead={lead as LeadRow} parties={await getParties()} members={await getMembers()} />
 
         <aside className="grid content-start gap-4">
           <section className="rounded-xl border p-4">

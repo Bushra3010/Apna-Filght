@@ -30,6 +30,7 @@ const Schema = z
     budget: z.string(),
     remarks: z.string().max(250, 'Remarks can be at most 250 characters'),
     status: z.string(),
+    assigned_to: opt,
     followup_action: opt,
     followup_date: opt,
     followup_slot: opt,
@@ -42,6 +43,10 @@ export async function saveLead(_: FormState, form: FormData): Promise<FormState>
   const d = parsed.data
   if (!d.id && !d.followup_date) return { error: 'Set the next follow-up date' }
   const { supabase, org } = await getContext()
+  if (d.assigned_to) {
+    const { count } = await supabase.from('org_members').select('id', { count: 'exact', head: true }).eq('id', d.assigned_to).eq('org_id', org.id).eq('is_active', true)
+    if (!count) return { error: 'Choose a team member from this company' }
+  }
 
   const payload = {
     ...d,

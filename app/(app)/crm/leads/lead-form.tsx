@@ -28,9 +28,18 @@ export type LeadRow = {
   budget?: number | null
   remarks?: string | null
   status?: string
+  assigned_to?: string | null
 }
 
-export function LeadForm({ lead, parties }: { lead: LeadRow; parties: { id: string; name: string }[] }) {
+export function LeadForm({
+  lead,
+  parties,
+  members,
+}: {
+  lead: LeadRow
+  parties: { id: string; name: string }[]
+  members: { id: string; display_name: string }[]
+}) {
   const [state, action] = useActionState(saveLead, undefined)
   const [pax, setPax] = useState({
     adults: lead.adults ?? 1,
@@ -115,7 +124,15 @@ export function LeadForm({ lead, parties }: { lead: LeadRow; parties: { id: stri
 
       <section className="grid gap-4 rounded-xl border p-4">
         <h2 className="text-sm font-medium">Enquiry</h2>
-        <div className="grid gap-4 sm:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-5">
+          <Field label="Assigned to" htmlFor="assigned_to">
+            <NativeSelect id="assigned_to" name="assigned_to" defaultValue={lead.assigned_to ?? ''}>
+              <option value="">{lead.id ? '—' : 'Me'}</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>{m.display_name}</option>
+              ))}
+            </NativeSelect>
+          </Field>
           <Field label="Source" htmlFor="source">
             <NativeSelect id="source" name="source" defaultValue={lead.source ?? ''}>
               <option value="">—</option>

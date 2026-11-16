@@ -3,6 +3,7 @@ import { getContext } from '@/lib/context'
 import { formatINR } from '@/lib/money'
 import { PageHeader } from '@/components/page-header'
 import { LinkButton } from '@/components/link-button'
+import { AgeingBars, MonthlySalesChart } from '@/components/charts'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -10,13 +11,14 @@ type Summary = { sales: number; margin: number; receivable: number; receipts: nu
 
 export default async function DashboardPage() {
   const { supabase, org, fy } = await getContext()
-  const [{ data: summary }, { data: recent }, { data: due }] = await Promise.all([
+  const [{ data: summary }, { data: recent }, { data: due }, { data: monthly }, { data: ageing }] = await Promise.all([
     supabase.rpc('dashboard_summary', { p_org: org.id, p_fy: fy.id }),
     supabase
       .from('invoices')
       .select('id, invoice_no, invoice_date, total, ledgers!invoices_party_ledger_id_fkey(name)')
       .eq('org_id', org.id)
       .eq('fy_id', fy.id)
+      .eq('doc_kind', 'invoice')
       .order('created_at', { ascending: false })
       .limit(5),
     supabase
@@ -26,7 +28,15 @@ export default async function DashboardPage() {
       .is('done_at', null)
       .order('due_at')
       .limit(5),
+    supabase.rpc('monthly_sales', { p_org: org.id, p_fy: fy.id }),
+    supabase.rpc('receivable_ageing', { p_org: org.id }),
   ])
+  const months = ((monthly ?? []) as { month: string; sales: number; margin: number }[]).map((m) => ({
+    label: new Date(m.month + 'T00:00:00').toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }),
+    sales: Number(m.sales),
+    margin: Number(m.margin),
+  }))
+  const buckets = ((ageing ?? []) as { bucket: string; amount: number; invoices: number }[]).map((b) => ({ ...b, amount: Number(b.amount), invoices: Number(b.invoices) }))
   const s = (summary ?? {}) as Summary
 
   const tiles = [
@@ -57,6 +67,10 @@ export default async function DashboardPage() {
             <p className="mt-1 text-lg font-semibold tabular-nums">{t.value}</p>
           </div>
         ))}
+      </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <section className="rounded-xl border p-4"><MonthlySalesChart months={months} /></section>
+        <section className="rounded-xl border p-4"><AgeingBars buckets={buckets} /></section>
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border p-4">
