@@ -5,7 +5,7 @@ import { formatINR } from '@/lib/money'
 import { LinkButton } from '@/components/link-button'
 import { AgeingBars, MonthlySalesChart } from '@/components/charts'
 import { DeltaChip, Panel, Tile } from '@/components/tile'
-import { calendarRange, initials, MonthCalendar, type CalEvent } from '@/components/month-calendar'
+import { calendarRange, initials, MonthCalendar, sampleEvents, type CalEvent } from '@/components/month-calendar'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* overview tiles + calendar */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
         <Panel title="Overview" count={6}>
           <div className="grid gap-3 sm:grid-cols-[56px_1fr]">
             <Link href="/billing/invoices/new" aria-label="New invoice" className="hidden items-center justify-center rounded-3xl bg-muted/70 text-primary transition-colors hover:bg-muted sm:flex">
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
           </div>
         </Panel>
         <Panel title="Calendar" count={monthName} href="/crm/leads">
-          <MonthCalendar year={y} month={m - 1} today={today} events={events} />
+          <MonthCalendar year={y} month={m - 1} today={today} events={events.length ? events : sampleEvents(y, m - 1)} sample={!events.length} />
         </Panel>
       </div>
 
