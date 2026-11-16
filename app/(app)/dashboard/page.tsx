@@ -5,7 +5,7 @@ import { formatINR } from '@/lib/money'
 import { LinkButton } from '@/components/link-button'
 import { AgeingBars, MonthlySalesChart } from '@/components/charts'
 import { DeltaChip, Panel, Tile } from '@/components/tile'
-import { MonthCalendar, type CalEvent } from '@/components/month-calendar'
+import { calendarRange, initials, MonthCalendar, type CalEvent } from '@/components/month-calendar'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -17,9 +17,9 @@ export default async function DashboardPage() {
   const { supabase, org, fy } = await getContext()
   const today = ist()
   const [y, m] = today.split('-').map(Number)
-  const monthStart = `${today.slice(0, 7)}-01`
-  const monthEnd = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
   const weekAgo = new Date(Date.parse(today) - 7 * 86400000).toISOString().slice(0, 10)
+  // the calendar shows whole weeks, so it also covers a few days of the months either side
+  const [calFrom, calTo] = calendarRange(y, m - 1)
 
   const [
     { data: summary }, { data: recent }, { data: due }, { data: monthly }, { data: ageing },
@@ -37,13 +37,19 @@ export default async function DashboardPage() {
     supabase.from('vouchers').select('id', { count: 'exact', head: true }).eq('org_id', org.id).eq('fy_id', fy.id).eq('kind', 'receipt'),
     supabase.from('leads').select('id', { count: 'exact', head: true }).eq('org_id', org.id).gte('enquiry_date', weekAgo),
     supabase.rpc('party_outstanding', { p_org: org.id, p_fy: fy.id, p_as_of: today < fy.ends_on ? today : fy.ends_on, p_kind: 'supplier' }),
-    supabase.from('lead_followups').select('due_at, action, leads(guest_name)').eq('org_id', org.id).is('done_at', null)
-      .gte('due_at', `${monthStart}T00:00:00+05:30`).lte('due_at', `${monthEnd}T23:59:59+05:30`),
-    supabase.from('leads').select('travel_date, guest_name').eq('org_id', org.id).gte('travel_date', monthStart).lte('travel_date', monthEnd)
+    supabase.from('lead_followups').select('due_at, action, created_by, leads(guest_name, assigned_to)').eq('org_id', org.id).is('done_at', null)
+      .gte('due_at', `${calFrom}T00:00:00+05:30`).lte('due_at', `${calTo}T23:59:59+05:30`),
+    supabase.from('leads').select('travel_date, guest_name, assigned_to').eq('org_id', org.id).gte('travel_date', calFrom).lte('travel_date', calTo)
       .not('status', 'in', '(booked,not_interested,fake)'),
-    supabase.from('invoice_lines').select('travel_date, pax_name, invoices!inner(status, doc_kind)').eq('org_id', org.id)
-      .gte('travel_date', monthStart).lte('travel_date', monthEnd).eq('invoices.status', 'posted').eq('invoices.doc_kind', 'invoice'),
+    supabase.from('invoice_lines').select('travel_date, pax_name, invoices!inner(invoice_no, status, doc_kind, created_by)').eq('org_id', org.id)
+      .gte('travel_date', calFrom).lte('travel_date', calTo).eq('invoices.status', 'posted').eq('invoices.doc_kind', 'invoice'),
   ])
+  const { data: members } = await supabase.from('org_members').select('id, display_name').eq('org_id', org.id)
+  const who = new Map((members ?? []).map((mb) => [mb.id as string, mb.display_name as string]))
+  const person = (id: string | null | undefined) => {
+    const name = id ? who.get(id) : undefined
+    return name ? { name, initials: initials(name) } : undefined
+  }
 
   const s = (summary ?? {}) as Summary
   const months = ((monthly ?? []) as { month: string; sales: number; margin: number }[]).map((x) => ({
@@ -66,9 +72,15 @@ export default async function DashboardPage() {
 
   const istDate = (iso: string) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
   const events: CalEvent[] = [
-    ...(calFollow ?? []).map((f) => ({ date: istDate(f.due_at), kind: 'followup' as const, label: `Follow-up: ${(f.leads as unknown as { guest_name: string } | null)?.guest_name ?? ''}` })),
-    ...(calLeads ?? []).map((l) => ({ date: l.travel_date as string, kind: 'travel' as const, label: `Lead travels: ${l.guest_name}` })),
-    ...(calTrips ?? []).map((t) => ({ date: t.travel_date as string, kind: 'trip' as const, label: `Trip: ${t.pax_name ?? ''}` })),
+    ...(calFollow ?? []).map((f) => {
+      const lead = f.leads as unknown as { guest_name: string; assigned_to: string | null } | null
+      return { date: istDate(f.due_at), kind: 'followup' as const, label: `Follow-up: ${lead?.guest_name ?? ''}${f.action ? ` (${f.action})` : ''}`, who: person(lead?.assigned_to ?? f.created_by) }
+    }),
+    ...(calLeads ?? []).map((l) => ({ date: l.travel_date as string, kind: 'travel' as const, label: `Enquiry travels: ${l.guest_name}`, who: person(l.assigned_to) })),
+    ...(calTrips ?? []).map((t) => {
+      const inv = t.invoices as unknown as { invoice_no: string; created_by: string | null }
+      return { date: t.travel_date as string, kind: 'trip' as const, label: `Trip: ${t.pax_name ?? ''} (${inv.invoice_no})`, who: person(inv.created_by) }
+    }),
   ]
   const monthName = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-IN', { month: 'long', timeZone: 'UTC' })
 
