@@ -111,6 +111,7 @@ ok(parseMoney('') === '' && parseMoney('-') === '' && parseMoney('abc') === null
 
 // --- WhatsApp messages
 ok(fillTemplate('Dear {client},\n\n{travel}\n\nThanks {unknown}', { client: 'Asha', travel: '' }) === 'Dear Asha,\n\nThanks {unknown}', 'messages: placeholders filled, empty lines tidied, unknown left')
+ok(fillTemplate('Hi {client},\r\n\r\nBye', { client: 'A' }) === 'Hi A,\n\nBye', 'messages: Windows line breaks from the settings form normalised')
 ok(waNumber('98765 43210') === '919876543210' && waNumber('+91-98765-43210') === '919876543210' && waNumber('098765 43210') === '919876543210' && waNumber('12345') === null, 'messages: Indian mobile numbers for wa.me')
 ok(waLink(null, 'a b&c') === 'https://wa.me/?text=a%20b%26c', 'messages: wa.me link without a number, text encoded')
 

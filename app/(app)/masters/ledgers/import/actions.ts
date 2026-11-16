@@ -93,6 +93,11 @@ export async function importLedgers(_: ImportResult, form: FormData): Promise<Im
   if (openings.length) {
     const { error } = await supabase.from('opening_balances').upsert(openings, { onConflict: 'fy_id,ledger_id' })
     if (error) note = ` Opening balances not saved: ${friendlyError(error.message)}`
+    else {
+      const { data: all } = await supabase.from('opening_balances').select('amount').eq('org_id', org.id).eq('fy_id', fy.id)
+      const diff = (all ?? []).reduce((a, r) => a + Number(r.amount), 0)
+      if (diff !== 0) note = ` Opening balances for FY ${fy.label} now differ by ${formatINR(Math.abs(diff))} (${diff > 0 ? 'more debit' : 'more credit'}): enter the remaining balances under Accounts → Opening balances.`
+    }
   }
   await recordBatch(supabase, org.id, member.id, 'ledgers', payload.mapping_name, payload.file_name,
     prepared.map((p) => ({ n: p.n, raw: p.raw, error: p.errors.join('; ') || p.skip || outcome.get(p.n)?.error })))

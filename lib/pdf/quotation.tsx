@@ -54,8 +54,8 @@ export function QuotationPage({ d }: { d: QuotationData }) {
       </View>
 
       <Text style={s.label}>Prepared for</Text>
-      <Text style={[s.bold, { fontSize: 11 }]}>{q.client_name}</Text>
-      <Text style={{ fontSize: 15, fontWeight: 700, marginTop: 8 }}>{q.ptitle?.name || q.routes?.name || 'Holiday package'}</Text>
+      <Text style={[s.bold, { fontSize: 11, lineHeight: 1.4 }]}>{q.client_name}</Text>
+      <Text style={{ fontSize: 15, lineHeight: 1.3, fontWeight: 700, marginTop: 8, marginBottom: 2 }}>{q.ptitle?.name || q.routes?.name || 'Holiday package'}</Text>
       <Text style={s.muted}>
         {[q.routes?.name, q.nights !== null && `${q.nights} nights / ${q.nights + 1} days`, q.start_date && `${dateIN(q.start_date)}${end ? ` – ${dateIN(end)}` : ''}`,
           `${q.adults} adult(s)${q.children ? `, ${q.children} child(ren)` : ''}${q.infants ? `, ${q.infants} infant(s)` : ''}`, q.meal?.name].filter(Boolean).join(' · ')}

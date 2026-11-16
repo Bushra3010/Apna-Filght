@@ -29,8 +29,8 @@ export const s = StyleSheet.create({
   row: { flexDirection: 'row' },
   between: { flexDirection: 'row', justifyContent: 'space-between' },
   header: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: RULE, paddingBottom: 10, marginBottom: 10 },
-  company: { fontSize: 13, fontWeight: 700, marginBottom: 2 },
-  title: { fontSize: 13, fontWeight: 700, letterSpacing: 1, textAlign: 'right', marginBottom: 2 },
+  company: { fontSize: 13, lineHeight: 1.3, fontWeight: 700, marginBottom: 2 },
+  title: { fontSize: 13, lineHeight: 1.3, fontWeight: 700, letterSpacing: 1, textAlign: 'right', marginBottom: 2 },
   label: { fontSize: 7, color: MUTED, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 },
   muted: { color: MUTED },
   bold: { fontWeight: 700 },
@@ -71,8 +71,8 @@ export function CompanyBlock({ c }: { c: Company }) {
 export function KV({ k, v, strong, top }: { k: string; v: string; strong?: boolean; top?: boolean }) {
   return (
     <View style={[s.between, { paddingVertical: 1.5 }, top ? { borderTopWidth: 1, borderTopColor: RULE, marginTop: 3, paddingTop: 4 } : {}]}>
-      <Text style={strong ? [s.bold, { fontSize: 10.5 }] : undefined}>{k}</Text>
-      <Text style={strong ? [s.bold, { fontSize: 10.5 }] : undefined}>{v}</Text>
+      <Text style={strong ? [s.bold, { fontSize: 10.5, lineHeight: 1.4 }] : undefined}>{k}</Text>
+      <Text style={strong ? [s.bold, { fontSize: 10.5, lineHeight: 1.4 }] : undefined}>{v}</Text>
     </View>
   )
 }

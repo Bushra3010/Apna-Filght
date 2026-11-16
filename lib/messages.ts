@@ -32,6 +32,7 @@ export const MESSAGE_DOCS: { key: MessageDoc; label: string; vars: string[]; bod
 /** Replace {name} placeholders; unknown names are left as they are. Blank lines left by empty values are tidied. */
 export function fillTemplate(body: string, vars: Record<string, string | null | undefined>): string {
   return body
+    .replace(/\r\n?/g, '\n')
     .replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? (vars[k] ?? '') : m))
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')

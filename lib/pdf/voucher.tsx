@@ -49,7 +49,7 @@ export function VoucherPage({ d }: { d: VoucherData }) {
         </View>
       </View>
 
-      <Text style={{ fontSize: 10, marginBottom: 8 }}>
+      <Text style={{ fontSize: 10, lineHeight: 1.5, marginBottom: 8 }}>
         {isReceipt ? 'Received with thanks from ' : 'Paid to '}
         <Text style={s.bold}>{v.party?.name ?? '—'}</Text> the sum of <Text style={s.bold}>{formatINR(v.amount)}</Text> ({amountInWords(v.amount)})
         {' '}by {MODE[v.mode ?? ''] ?? v.mode}{v.account ? ` (${isReceipt ? 'into' : 'from'} ${v.account.name})` : ''}.

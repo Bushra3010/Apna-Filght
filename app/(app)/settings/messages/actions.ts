@@ -7,7 +7,7 @@ import { MESSAGE_DOCS } from '@/lib/messages'
 import type { FormState } from '@/components/form'
 
 export async function saveTemplates(_: FormState, form: FormData): Promise<FormState & { saved?: boolean }> {
-  const rows = MESSAGE_DOCS.map((d) => ({ doc_type: d.key, body: String(form.get(d.key) ?? '').trim() }))
+  const rows = MESSAGE_DOCS.map((d) => ({ doc_type: d.key, body: String(form.get(d.key) ?? '').replace(/\r\n?/g, '\n').trim() }))
   const empty = rows.find((r) => !r.body)
   if (empty) return { error: `The ${MESSAGE_DOCS.find((d) => d.key === empty.doc_type)!.label.toLowerCase()} message is empty` }
   if (rows.some((r) => r.body.length > 2000)) return { error: 'Keep each message under 2,000 characters' }
