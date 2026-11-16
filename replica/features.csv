@@ -1,0 +1,56 @@
+id,area,feature,priority,milestone,status
+F01,Platform,Sign up / sign in (email + password; Google later),must,M1,todo
+F02,Platform,Organisation (company) with members and invites,must,M1,todo
+F03,Platform,Financial year: create / switch / close with balance transfer,must,M1/M4,todo
+F04,Platform,Roles with per-module permissions,must,M5,todo
+F05,Platform,Document number series per type and year,must,M1,todo
+F06,Platform,Company setup: profile / GSTIN / PAN / bank details / invoice terms / logo,must,M1,todo
+F07,Masters,Chart of accounts groups (seeded tree),must,M1,todo
+F08,Masters,Ledgers (clients / suppliers / bank / cash / expense) with GSTIN and state,must,M1,todo
+F09,Masters,Passengers with documents,should,M2,todo
+F10,Masters,Airlines / sectors / countries / states / cities (seeded),must,M1,todo
+F11,Masters,Small lookups: booked by / service type / visa type / room type / room category / taxi type / meal plan / package type / follow-up action / package class / destination / bank name,must,M2,todo
+F12,Masters,Excel import for ledgers,could,M6,todo
+F13,CRM,Leads list with filters / status chips / search,must,M1,todo
+F14,CRM,New / edit lead with services / pax / source / budget,must,M1,todo
+F15,CRM,Follow-ups with action / date / time slot; today and overdue lists,must,M2,todo
+F16,CRM,Lead assignment / transfer between users,should,M2,todo
+F17,CRM,User hierarchy (reporting managers; self & team view),should,M5,todo
+F18,CRM,CRM dashboard: funnel / pendency ageing / proposal value buckets / trips,should,M5,todo
+F19,CRM,Itinerary master with day-wise plan and policies,should,M3,todo
+F20,CRM,B2C quotation built from itinerary + hotel / activity / vehicle rates; print/PDF; accept,must,M3,todo
+F21,CRM,Hotel master + hotel rate master (class / room category / meal plan / date ranges),should,M3,todo
+F22,CRM,Activity rates / vehicle rates / additional services,should,M3,todo
+F23,CRM,Routes / destinations / package titles and classes,should,M3,todo
+F24,CRM,Convert lead -> quotation -> proforma -> invoice,must,M1/M3,todo
+F25,Billing,Invoice: all 10 types with header / lines / sale+purchase per line,must,M1 (Domestic) / M2 (rest),todo
+F26,Billing,Automatic GST split (CGST+SGST vs IGST) from place of supply,must,M1,todo
+F27,Billing,Invoice print / PDF / email,must,M2,todo
+F28,Billing,Cancellation / credit note with charges and refund,must,M2,todo
+F29,Billing,Proforma invoice,must,M3,todo
+F30,Billing,Hotel / cruise voucher with print,should,M3,todo
+F31,Billing,Multiple printing (bulk PDF),could,M6,todo
+F32,Billing,E-invoice (IRN) via GSP API,could,M6,todo
+F33,Billing,Online payment link (Razorpay or Cashfree official API) + webhook to receipt,should,M6,todo
+F34,Purchase,General purchase bill,must,M2,todo
+F35,Purchase,Group purchase / fixed departure with pax allocation,should,M4,todo
+F36,Purchase,Excel import of supplier / GDS booking reports -> invoices,should,M6,todo
+F37,Purchase,Pending purchase / pending billing lists,should,M4,todo
+F38,Vouchers,Receipt / payment / contra / journal,must,M1 (receipt) / M2,todo
+F39,Vouchers,Multi-line receipt / payment,should,M4,todo
+F40,Vouchers,Bill adjustment (allocate receipts to invoices),must,M2,todo
+F41,Vouchers,Excel import of vouchers / gateway receipts,could,M6,todo
+F42,Accounts,Ledger statement,must,M1,todo
+F43,Accounts,Cash book / bank book / day book,must,M2,todo
+F44,Accounts,Trial balance (opening + period) with group drill-down,must,M4,todo
+F45,Accounts,Profit & loss / balance sheet,must,M4,todo
+F46,Outstanding,Receivable / payable / day-wise ageing / bill-wise,must,M4,todo
+F47,GST,GSTR-1 sections + JSON export,must,M4,todo
+F48,GST,GSTR-2 purchase tax / GSTR-3B summary,should,M4,todo
+F49,Reports,Sales register with KPIs / margin by type / top parties / Excel export,must,M4,todo
+F50,Reports,Purchase register / purchase return,should,M4,todo
+F51,Alerts,Invalid GST / loss-making invoices & credit notes / sale-purchase mismatches,should,M5,todo
+F52,Dashboard,ERP dashboard: sales / receivable / payable / cash / bank / monthly chart / ageing / next 5 days,must,M2,todo
+F53,Platform,Message templates (email/WhatsApp text) for documents,could,M6,todo
+F54,Platform,Voucher renumbering,could,M6,todo
+F55,Platform,Mobile-friendly layout with bottom nav,should,M5,todo
