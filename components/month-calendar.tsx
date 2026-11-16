@@ -26,7 +26,7 @@ export function MonthCalendar({ year, month, today, events }: { year: number; mo
   const cells = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)]
   return (
     <div>
-      <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-[11px] font-medium text-muted-foreground">
+      <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-xs font-medium text-muted-foreground">
         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i}>{d}</span>)}
       </div>
       <ol className="grid grid-cols-7 gap-1.5">
@@ -42,16 +42,16 @@ export function MonthCalendar({ year, month, today, events }: { year: number; mo
               title={ev.length ? ev.map((e) => e.label).join('\n') : undefined}
               aria-label={`${d}${ev.length ? `: ${ev.length} event${ev.length > 1 ? 's' : ''}` : ''}`}
               className={cn(
-                'relative flex aspect-square flex-col items-start justify-between rounded-2xl bg-muted/70 p-1.5 text-xs font-semibold',
+                'relative flex aspect-square items-center justify-center rounded-2xl bg-muted/70 text-sm font-semibold tabular-nums',
                 ev.length > 0 && `ring-2 ring-inset ${RING[kind!]}`,
                 isToday && 'bg-primary text-primary-foreground',
               )}
             >
-              <span>{d}</span>
+              <span className="leading-none">{d}</span>
               {ev.length > 0 && (
-                <span className="flex items-center gap-0.5 self-end">
-                  {[...new Set(ev.map((e) => e.kind))].map((k) => <span key={k} className={cn('size-1.5 rounded-full', DOT[k])} />)}
-                  {ev.length > 1 && <span className="ml-0.5 text-[10px] leading-none">{ev.length}</span>}
+                <span className="absolute bottom-[14%] left-1/2 flex -translate-x-1/2 items-center gap-0.5">
+                  {[...new Set(ev.map((e) => e.kind))].map((k) => <span key={k} className={cn('size-1 rounded-full', DOT[k])} />)}
+                  {ev.length > 1 && <span className="ml-0.5 text-[9px] leading-none">{ev.length}</span>}
                 </span>
               )}
             </li>

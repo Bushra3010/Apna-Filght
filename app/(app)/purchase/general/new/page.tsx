@@ -1,5 +1,6 @@
 import { PageHeader } from '@/components/page-header'
-import { PurchaseForm, blankPLine } from '../purchase-form'
+import { PurchaseForm } from '../purchase-form'
+import { blankPLine } from '@/lib/purchase'
 import { getPurchaseOptions } from '../data'
 
 export const metadata = { title: 'New purchase bill' }

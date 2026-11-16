@@ -5,7 +5,7 @@ import { LinkButton } from '@/components/link-button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { LEDGER_KINDS } from './ledger-form'
+import { LEDGER_KINDS } from '@/lib/ledgers'
 
 export const metadata = { title: 'Ledgers' }
 

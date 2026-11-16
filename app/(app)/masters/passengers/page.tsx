@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getContext } from '@/lib/context'
+import { todayIST } from '@/lib/dates'
 import { PageHeader, EmptyState } from '@/components/page-header'
 import { LinkButton } from '@/components/link-button'
 import { Badge } from '@/components/ui/badge'
@@ -10,9 +11,8 @@ export const metadata = { title: 'Passengers' }
 
 /** Passports expiring within ~6 months are flagged (most countries require 6 months' validity). */
 function expiryWarningDate() {
-  const d = new Date()
-  d.setMonth(d.getMonth() + 6)
-  return d.toISOString().slice(0, 10)
+  const [y, m, d] = todayIST().split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1 + 6, d)).toISOString().slice(0, 10)
 }
 
 export default async function PassengersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

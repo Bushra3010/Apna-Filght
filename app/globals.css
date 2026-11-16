@@ -121,14 +121,21 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
+  }
+  /* soft glow on its own fixed layer (background-attachment: fixed repaints badly on long pages) */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
       radial-gradient(1100px 520px at 12% -8%, rgb(64 110 112 / 0.28), transparent 62%),
       radial-gradient(900px 480px at 100% 0%, rgb(201 242 91 / 0.05), transparent 60%);
-    background-attachment: fixed;
   }
   @media print {
-    body {
-      background-image: none;
+    body::before {
+      display: none;
     }
   }
   html {

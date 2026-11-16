@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Field, FormError, NativeSelect, SubmitButton } from '@/components/form'
 import { LinkButton } from '@/components/link-button'
 import { saveLedger } from './actions'
+import { LEDGER_KINDS } from '@/lib/ledgers'
 
 export type LedgerRow = {
   id?: string
@@ -22,16 +23,6 @@ export type LedgerRow = {
   credit_days?: number
 }
 
-export const LEDGER_KINDS = [
-  ['customer', 'Customer / client'],
-  ['supplier', 'Supplier / airline / consolidator'],
-  ['bank', 'Bank account'],
-  ['cash', 'Cash'],
-  ['expense', 'Expense'],
-  ['income', 'Other income'],
-  ['capital', 'Capital'],
-  ['other', 'Other'],
-] as const
 
 export function LedgerForm({
   ledger,

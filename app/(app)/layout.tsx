@@ -27,7 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Tabs />
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <span className="hidden h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium lg:flex">{ctx.org.name}</span>
+            <Link href="/settings/companies" title="Switch company" className="hidden h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-accent lg:flex">{ctx.org.name}</Link>
             <Link
               href="/settings/years"
               className="flex h-11 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-muted-foreground hover:text-foreground"

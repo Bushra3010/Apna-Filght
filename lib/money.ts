@@ -17,13 +17,16 @@ export function toPaise(rupees: string | number | null | undefined): number {
 }
 
 /** 123450 -> "₹1,234.50" */
+/** paise -> rupees, with -0 folded to 0 so nothing prints as "-0.00" */
+const rupees = (paise: number | string | null | undefined) => Number(paise ?? 0) / 100 || 0
+
 export function formatINR(paise: number | string | null | undefined): string {
-  return inr.format(Number(paise ?? 0) / 100)
+  return inr.format(rupees(paise))
 }
 
 /** 123450 -> "1,234.50" (for tables) */
 export function formatAmount(paise: number | string | null | undefined): string {
-  return plain.format(Number(paise ?? 0) / 100)
+  return plain.format(rupees(paise))
 }
 
 /** 123450 -> "1234.50" (for input values) */

@@ -101,7 +101,8 @@ export function PaymentForm({
 }) {
   const [state, action] = useActionState(saveVoucher, undefined)
   const accounts = ledgers.filter((l) => l.kind === 'bank' || l.kind === 'cash')
-  const payees = ledgers.filter((l) => l.kind !== 'bank' && l.kind !== 'cash')
+  // money is paid to people and expense / tax accounts, never to income accounts
+  const payees = ledgers.filter((l) => !['bank', 'cash', 'income'].includes(l.kind))
   const preset = open.find((o) => o.id === initialDoc)
   const [v, setV] = useState({
     ...common(today),

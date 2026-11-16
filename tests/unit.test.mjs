@@ -59,6 +59,11 @@ ok(!JSON.stringify(g).includes('INV-5'), 'fare-only invoice (no taxable value) n
 const j = gstr1Json(g, '27ABCDE1234F1Z5', '112026')
 ok(j.b2b[0].inv[0].itms[0].num === 1801 && j.b2b[0].inv[0].itms[0].itm_det.camt === 27 && j.b2b[0].inv[0].idt === '10-11-2026', 'GSTR-1 JSON: B2B item in rupees, dd-mm-yyyy')
 ok(j.hsn.hsn_b2b[0].hsn_sc === '998551', 'GSTR-1 JSON: SAC summary')
+const gcn = buildGstr1([
+  L({ id: 'x', no: 'CN-9', kind: 'credit_note', total: 521000, gstin: '10AAACT1234F1Z5', pos: '10', ref: 'INV-1', tx: -50000, c: -4500, s: -4500 }),
+], [])
+ok(gcn.cdnr.length === 1 && gcn.cdnr[0].note === 'D' && gcn.cdnr[0].taxable === 50000 && gcn.net.cgst === 4500, 'credit note carrying only cancellation-charge GST is reported as a debit note with positive values')
+ok(gstr1Json(gcn, '10AAAAA0000A1Z5', '112026').cdnr[0].nt[0].ntty === 'D', 'GSTR-1 JSON: debit note type D')
 const b = buildGstr3b(g, [{ taxable: 2000000, igst: 0, cgst: 180000, sgst: 180000, tds: 200000 }])
 ok(b.payable.cgst === g.net.cgst - 180000, 'GSTR-3B: output tax less ITC')
 ok(b.interB2c.length === 1 && b.interB2c[0].taxable === 15000000 + 30000 - 4000000, 'GSTR-3B 3.2: inter-state B2C by state')
@@ -74,6 +79,31 @@ const pl = profitAndLoss(tb)
 ok(pl.gross === 300 && pl.net === 200, 'P&L: gross profit 300, net profit 200')
 const bs = balanceSheet(tb)
 ok(bs.diff === 0 && bs.totalAssets === 500 && bs.totalLiab === 500, 'balance sheet balances with profit in capital')
+
+// --- client boundary: server files must not import non-component values from 'use client' files
+// (on the server those imports are placeholders, e.g. an array becomes something without .map)
+{
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : /\.tsx?$/.test(e.name) ? [path.join(d, e.name)] : []))
+  const files = ['app', 'components', 'lib'].flatMap((d) => walk(path.join(root, d)))
+  const isClient = (f) => /^['"]use client['"]/.test(fs.readFileSync(f, 'utf8').trimStart())
+  const resolveImport = (from, spec) => {
+    const base = spec.startsWith('@/') ? path.join(root, spec.slice(2)) : spec.startsWith('.') ? path.resolve(path.dirname(from), spec) : null
+    if (!base) return null
+    return [base, `${base}.tsx`, `${base}.ts`, path.join(base, 'index.tsx')].find((p) => fs.existsSync(p) && fs.statSync(p).isFile()) ?? null
+  }
+  const bad = []
+  for (const f of files.filter((f) => !isClient(f))) {
+    const src = fs.readFileSync(f, 'utf8')
+    for (const m of src.matchAll(/import\s+(?!type\b)\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/g)) {
+      const target = resolveImport(f, m[2])
+      if (!target || !isClient(target)) continue
+      const names = m[1].split(',').map((x) => x.trim()).filter((x) => x && !x.startsWith('type '))
+      // components start with an upper-case letter followed by lower case (PascalCase); anything else is data or a helper
+      for (const n of names) if (!/^[A-Z][a-z]/.test(n)) bad.push(`${path.relative(root, f)} imports ${n} from ${path.relative(root, target)}`)
+    }
+  }
+  ok(bad.length === 0, `no server file imports data from a client file${bad.length ? `: ${bad.join('; ')}` : ''}`)
+}
 
 fs.rmSync(out, { recursive: true, force: true })
 console.log(bad ? `\n${bad} failed` : '\nall unit tests passed')

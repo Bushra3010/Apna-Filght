@@ -19,6 +19,7 @@ function DocTable({ id, docs, showGstin, cn }: { id: string; docs: Doc[]; showGs
         <tr>
           {showGstin && <th className={`${th} text-left`}>GSTIN</th>}
           <th className={`${th} text-left`}>{cn ? 'Note' : 'Invoice'}</th><th className={`${th} text-left`}>Date</th>
+          {cn && <th className={`${th} text-left`}>Type</th>}
           {cn && <th className={`${th} text-left`}>Against</th>}
           <th className={`${th} text-left`}>Party</th><th className={`${th} text-left`}>POS</th>
           <th className={`${th} text-right`}>Value</th><th className={`${th} text-right`}>Taxable</th>
@@ -31,6 +32,7 @@ function DocTable({ id, docs, showGstin, cn }: { id: string; docs: Doc[]; showGs
             {showGstin && <td className="px-3 py-1.5 font-mono text-xs">{d.gstin}</td>}
             <td className="px-3 py-1.5"><Link href={`/billing/invoices/${d.id}`} className="hover:underline">{d.no}</Link></td>
             <td className="px-3 py-1.5">{new Date(d.date).toLocaleDateString('en-IN')}</td>
+            {cn && <td className="px-3 py-1.5">{d.note === 'D' ? 'Debit' : 'Credit'}</td>}
             {cn && <td className="px-3 py-1.5">{d.ref_no}</td>}
             <td className="px-3 py-1.5">{d.party}</td><td className="px-3 py-1.5">{d.pos}</td>
             <td className={num}>{formatAmount(d.value)}</td><td className={num}>{formatAmount(d.taxable)}</td>
@@ -60,7 +62,7 @@ export default async function Gstr1Page({ searchParams }: { searchParams: Promis
   const json = gstin ? gstr1Json(g, gstin, p.fp) : null
   const cards = [
     ['B2B', g.totals.b2b, g.b2b.length], ['B2CL', g.totals.b2cl, g.b2cl.length], ['B2CS', g.totals.b2cs, g.b2cs.length],
-    ['Credit notes', { taxable: g.totals.cdnr.taxable + g.totals.cdnur.taxable, igst: g.totals.cdnr.igst + g.totals.cdnur.igst, cgst: g.totals.cdnr.cgst + g.totals.cdnur.cgst, sgst: g.totals.cdnr.sgst + g.totals.cdnur.sgst }, g.cdnr.length + g.cdnur.length],
+    ['Notes (net)', [...g.cdnr, ...g.cdnur].reduce((a, n) => { const s = n.note === 'D' ? 1 : -1; return { taxable: a.taxable + s * n.taxable, igst: a.igst + s * n.igst, cgst: a.cgst + s * n.cgst, sgst: a.sgst + s * n.sgst } }, { taxable: 0, igst: 0, cgst: 0, sgst: 0 }), g.cdnr.length + g.cdnur.length],
   ] as const
 
   return (
@@ -75,6 +77,11 @@ export default async function Gstr1Page({ searchParams }: { searchParams: Promis
         <p className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           Add your GSTIN under <Link href="/settings/company" className="underline">Settings → Company</Link> to download the JSON.
         </p>
+      )}
+      {g.warnings.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {g.warnings.map((w) => <p key={w}>{w}</p>)}
+        </div>
       )}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {cards.map(([label, t, c]) => (
@@ -107,8 +114,8 @@ export default async function Gstr1Page({ searchParams }: { searchParams: Promis
             </tbody>
           </table>
         </Section>
-        <Section title="9B · Credit notes — registered (CDNR)" hint="Cancellations for clients with a GSTIN" id="cdnr" count={g.cdnr.length}><DocTable id="cdnr" docs={g.cdnr} showGstin cn /></Section>
-        <Section title="9B · Credit notes — unregistered (CDNUR)" hint="Against B2C large invoices" id="cdnur" count={g.cdnur.length}><DocTable id="cdnur" docs={g.cdnur} cn /></Section>
+        <Section title="9B · Credit / debit notes — registered (CDNR)" hint="Cancellations for clients with a GSTIN; a note that only adds GST (charges) is a debit note" id="cdnr" count={g.cdnr.length}><DocTable id="cdnr" docs={g.cdnr} showGstin cn /></Section>
+        <Section title="9B · Credit / debit notes — unregistered (CDNUR)" hint="Against B2C large invoices" id="cdnur" count={g.cdnur.length}><DocTable id="cdnur" docs={g.cdnur} cn /></Section>
         <Section title="8 · Nil-rated / exempt" hint="Bills of supply" id="nil" count={g.nil.length}>
           <table id="nil" className="w-full text-sm">
             <thead className="border-b text-xs text-muted-foreground"><tr><th className={`${th} text-left`}>Supply type</th><th className={`${th} text-right`}>Exempt</th></tr></thead>

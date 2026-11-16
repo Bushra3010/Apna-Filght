@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   ArrowLeftRight, Banknote, BarChart3, BedDouble, BookOpen, CalendarDays, CalendarRange, Car, ClipboardList, Clock,
-  Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
+  Building2, Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
   Luggage, Map as MapIcon, NotebookPen, PieChart, Plane, Receipt, ReceiptIndianRupee, Route, Scale, ScrollText,
   Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, type LucideIcon,
 } from 'lucide-react'
@@ -89,6 +89,7 @@ export const SECTIONS: Section[] = [
     key: 'settings', label: 'Settings', icon: Settings, bottom: true,
     items: [
       { href: '/settings/company', label: 'Company', icon: Settings },
+      { href: '/settings/companies', label: 'Companies', icon: Building2 },
       { href: '/settings/years', label: 'Financial years', icon: CalendarRange },
     ],
   },

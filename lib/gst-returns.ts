@@ -7,6 +7,8 @@
 // - B2CS: every other unregistered supply, summarised by place of supply and rate.
 // - CDNR: credit notes to registered clients. CDNUR: credit notes against B2CL
 //   invoices. Other unregistered credit notes reduce B2CS.
+// - A credit note whose GST goes up (only cancellation charges carry GST) is a
+//   debit note in GST terms: reported with note type 'D' and positive values.
 // - Bill of supply (no GST) is reported as exempt in the NIL table.
 // - SAC codes come from SAC_FOR_SERVICE below.
 
@@ -77,6 +79,8 @@ export type Doc = Amt & {
   ref_no: string | null
   ref_date: string | null
   rates: (Amt & { rate: number })[]
+  /** for notes: 'C' credit (reduces tax) or 'D' debit (adds tax, e.g. cancellation charges only) */
+  note?: 'C' | 'D'
 }
 export type B2csRow = Amt & { pos: string; rate: number; inter: boolean }
 export type NilRow = { type: 'INTRB2B' | 'INTRB2C' | 'INTRAB2B' | 'INTRAB2C'; exempt: number }
@@ -122,6 +126,25 @@ export function buildGstr1(salesRaw: Record<string, unknown>[], hsnRaw: Record<s
     }
   }
 
+  const warnings: string[] = []
+  // Split a credit note by sign: rates where tax is reversed stay a credit note,
+  // rates where tax is added (cancellation charges) become a debit note.
+  const notesOf = (d: Doc): Doc[] => {
+    const credit = d.rates.filter((r) => r.taxable + r.igst + r.cgst + r.sgst > 0)
+    const debit = d.rates.filter((r) => r.taxable + r.igst + r.cgst + r.sgst < 0)
+    const sum = (rs: Doc['rates']) => rs.reduce((a, r) => (add(a, r), a), zero())
+    const abs = (r: Doc['rates'][number]) => ({ rate: r.rate, taxable: -r.taxable, igst: -r.igst, cgst: -r.cgst, sgst: -r.sgst })
+    if (credit.length && debit.length) {
+      warnings.push(`${d.no}: refunds and cancellation charges at different GST rates. It is reported as a credit note; issue the charges on a separate invoice or debit note.`)
+      return [{ ...d, note: 'C', rates: credit, ...sum(credit) }]
+    }
+    if (debit.length) {
+      const rates = debit.map(abs)
+      return [{ ...d, note: 'D', rates, ...sum(rates) }]
+    }
+    return credit.length ? [{ ...d, note: 'C', rates: credit, ...sum(credit) }] : []
+  }
+
   for (const d of docs.values()) {
     if (d.bill_type === 'bill_of_supply') {
       const type = (d.inter ? 'INTR' : 'INTRA') + (d.gstin ? 'B2B' : 'B2C')
@@ -133,8 +156,8 @@ export function buildGstr1(salesRaw: Record<string, unknown>[], hsnRaw: Record<s
       if (d.gstin) b2b.push(d)
       else if (d.inter && d.value > B2CL_LIMIT) b2cl.push(d)
       else toB2cs(d, 1)
-    } else if (d.gstin) cdnr.push(d)
-    else if (d.inter && (d.ref_total ?? 0) > B2CL_LIMIT) cdnur.push(d)
+    } else if (d.gstin) cdnr.push(...notesOf(d))
+    else if (d.inter && (d.ref_total ?? 0) > B2CL_LIMIT) cdnur.push(...notesOf(d))
     else toB2cs(d, -1)
   }
 
@@ -164,11 +187,10 @@ export function buildGstr1(salesRaw: Record<string, unknown>[], hsnRaw: Record<s
   add(net, totals.b2b)
   add(net, totals.b2cl)
   add(net, totals.b2cs)
-  add(net, totals.cdnr, -1)
-  add(net, totals.cdnur, -1)
+  for (const n of [...cdnr, ...cdnur]) add(net, n, n.note === 'D' ? 1 : -1)
 
   return {
-    b2b, b2cl, b2cs, cdnr, cdnur, hsn, totals, net,
+    b2b, b2cl, b2cs, cdnr, cdnur, hsn, totals, net, warnings,
     nil: (Object.entries(nil) as [NilRow['type'], number][]).filter(([, v]) => v !== 0).map(([type, exempt]) => ({ type, exempt })),
   }
 }
@@ -204,9 +226,9 @@ export function gstr1Json(g: Gstr1, gstin: string, fp: string) {
     })),
     cdnr: Object.entries(groupBy(g.cdnr, (d) => d.gstin!)).map(([ctin, ds]) => ({
       ctin,
-      nt: ds.map((d) => ({ ntty: 'C', nt_num: d.no, nt_dt: ddmmyyyy(d.date), val: r2(d.value), pos: d.pos, rchrg: 'N', inv_typ: 'R', itms: itms(d) })),
+      nt: ds.map((d) => ({ ntty: d.note ?? 'C', nt_num: d.no, nt_dt: ddmmyyyy(d.date), val: r2(d.value), pos: d.pos, rchrg: 'N', inv_typ: 'R', itms: itms(d) })),
     })),
-    cdnur: g.cdnur.map((d) => ({ typ: 'B2CL', ntty: 'C', nt_num: d.no, nt_dt: ddmmyyyy(d.date), val: r2(d.value), pos: d.pos, itms: itms(d) })),
+    cdnur: g.cdnur.map((d) => ({ typ: 'B2CL', ntty: d.note ?? 'C', nt_num: d.no, nt_dt: ddmmyyyy(d.date), val: r2(d.value), pos: d.pos, itms: itms(d) })),
     nil: { inv: g.nil.map((x) => ({ sply_ty: x.type, expt_amt: r2(x.exempt), nil_amt: 0, ngsup_amt: 0 })) },
     hsn: {
       hsn_b2b: g.hsn.filter((h) => h.b2b).map((h, i) => hsnJson(h, i)),
@@ -242,8 +264,9 @@ export function buildGstr3b(g: Gstr1, purchasesRaw: Record<string, unknown>[]) {
   }
   for (const d of g.cdnur) {
     const x = interB2c.get(d.pos) ?? { taxable: 0, igst: 0 }
-    x.taxable -= d.taxable
-    x.igst -= d.igst
+    const s = d.note === 'D' ? 1 : -1
+    x.taxable += s * d.taxable
+    x.igst += s * d.igst
     interB2c.set(d.pos, x)
   }
   return {

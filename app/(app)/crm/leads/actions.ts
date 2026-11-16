@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { getContext } from '@/lib/context'
 import { friendlyError } from '@/lib/errors'
 import { toPaise } from '@/lib/money'
+import { todayIST } from '@/lib/dates'
 import type { FormState } from '@/components/form'
 
 const opt = z.string().trim().transform((v) => (v === '' ? null : v))
@@ -50,6 +51,7 @@ export async function saveLead(_: FormState, form: FormData): Promise<FormState>
 
   const payload = {
     ...d,
+    ...(d.id ? {} : { enquiry_date: todayIST() }),
     services: form.getAll('services').map(String),
     budget: d.budget ? toPaise(d.budget) : null,
     followup: d.followup_date

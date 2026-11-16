@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { todayIST } from '@/lib/dates'
 
 export type AppContext = Awaited<ReturnType<typeof getContext>>
 
@@ -36,7 +37,7 @@ export const getContext = cache(async () => {
     .eq('org_id', org.id)
     .order('starts_on', { ascending: false })
   if (!years?.length) throw new Error('This company has no financial year')
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayIST()
   const fy =
     years.find((y) => y.id === jar.get('fy')?.value) ??
     years.find((y) => y.starts_on <= today && today <= y.ends_on) ??
@@ -55,6 +56,6 @@ export const getContext = cache(async () => {
 
 /** Clamp a date to the active financial year (for default report ranges). */
 export function fyRange(fy: { starts_on: string; ends_on: string }) {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayIST()
   return { from: fy.starts_on, to: today < fy.ends_on ? (today > fy.starts_on ? today : fy.starts_on) : fy.ends_on }
 }

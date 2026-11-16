@@ -10,20 +10,9 @@ import { LinkButton } from '@/components/link-button'
 import { computeTax, GST_RATES } from '@/lib/gst'
 import { formatINR, toPaise } from '@/lib/money'
 import { savePurchaseBill } from './actions'
+import type { PLine, PurchaseDraft } from '@/lib/purchase'
+import { blankPLine } from '@/lib/purchase'
 
-export type PLine = { ledger_id: string; description: string; taxable: string; gst_rate: string }
-export type PurchaseDraft = {
-  id?: string
-  supplier_ledger_id: string
-  bill_date: string
-  supplier_bill_no: string
-  supplier_bill_date: string
-  place_of_supply_state_id: string
-  tds: string
-  notes: string
-  lines: PLine[]
-}
-export const blankPLine = (): PLine => ({ ledger_id: '', description: '', taxable: '', gst_rate: '18' })
 
 export function PurchaseForm({
   draft: initial,

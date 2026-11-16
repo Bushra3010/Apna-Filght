@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getContext } from '@/lib/context'
+import { todayIST } from '@/lib/dates'
 import { PageHeader, EmptyState } from '@/components/page-header'
 import { LinkButton } from '@/components/link-button'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +27,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   if (sp.status) query = query.eq('status', sp.status)
   if (sp.service) query = query.contains('services', [sp.service])
   if (sp.source) query = query.eq('source', sp.source)
-  if (sp.due === 'today') query = query.lte('next_followup_at', new Date(new Date().setHours(23, 59, 59)).toISOString())
+  if (sp.due === 'today') query = query.lte('next_followup_at', `${todayIST()}T23:59:59+05:30`)
   if (sp.q) {
     const q = sp.q.replace(/[,()]/g, ' ')
     query = query.or(`guest_name.ilike.%${q}%,phone.ilike.%${q}%,lead_no.ilike.%${q}%`)
