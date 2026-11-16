@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 import {
   ArrowLeftRight, BookOpen, Banknote, CalendarDays, Contact, FileMinus, FileText, LayoutDashboard, List,
   NotebookPen, Plane, Receipt, Settings, ShoppingCart, Users, Wallet, Landmark, Map as MapIcon, Hotel, Car, Route,
-  ScrollText, FileSignature, Ticket, BedDouble, Sparkles,
+  ScrollText, FileSignature, Ticket, BedDouble, Sparkles, Scale, TrendingUp, PieChart, ClipboardList, Clock,
+  Link2, FileSpreadsheet, ReceiptIndianRupee, CalendarRange, Coins,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +47,7 @@ export const NAV = [
       { href: '/vouchers/payments', label: 'Payments', icon: Banknote },
       { href: '/vouchers/contra', label: 'Contra', icon: ArrowLeftRight },
       { href: '/vouchers/journal', label: 'Journal', icon: NotebookPen },
+      { href: '/vouchers/adjust', label: 'Bill adjustment', icon: Link2 },
     ],
   },
   {
@@ -55,8 +57,21 @@ export const NAV = [
       { href: '/accounts/cash-book', label: 'Cash book', icon: Receipt },
       { href: '/accounts/bank-book', label: 'Bank book', icon: Landmark },
       { href: '/accounts/day-book', label: 'Day book', icon: CalendarDays },
+      { href: '/accounts/trial-balance', label: 'Trial balance', icon: Scale },
+      { href: '/accounts/profit-loss', label: 'Profit & loss', icon: TrendingUp },
+      { href: '/accounts/balance-sheet', label: 'Balance sheet', icon: PieChart },
+      { href: '/accounts/opening-balances', label: 'Opening balances', icon: Coins },
     ],
   },
+  {
+    group: 'Reports',
+    items: [
+      { href: '/reports/outstanding', label: 'Outstanding', icon: Clock },
+      { href: '/reports/sales-register', label: 'Sales register', icon: ClipboardList },
+      { href: '/reports/purchase-register', label: 'Purchase register', icon: FileSpreadsheet },
+    ],
+  },
+  { group: 'GST', items: [{ href: '/gst/gstr1', label: 'GST returns', icon: ReceiptIndianRupee }] },
   {
     group: 'Masters',
     items: [
@@ -65,7 +80,13 @@ export const NAV = [
       { href: '/masters/lists', label: 'Lists', icon: List },
     ],
   },
-  { group: 'Settings', items: [{ href: '/settings/company', label: 'Company', icon: Settings }] },
+  {
+    group: 'Settings',
+    items: [
+      { href: '/settings/company', label: 'Company', icon: Settings },
+      { href: '/settings/years', label: 'Financial years', icon: CalendarRange },
+    ],
+  },
 ]
 
 export function SideNav() {
@@ -81,7 +102,7 @@ export function SideNav() {
               href={href}
               className={cn(
                 'flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted',
-                path.startsWith(href) && 'bg-muted font-medium text-foreground',
+                (path.startsWith(href) || (href.startsWith('/gst/') && path.startsWith('/gst/'))) && 'bg-muted font-medium text-foreground',
               )}
             >
               <Icon className="size-4 text-muted-foreground" />

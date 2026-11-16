@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { LogOut, Plane } from 'lucide-react'
 import { getContext } from '@/lib/context'
 import { signOut } from '../(auth)/actions'
@@ -22,7 +23,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex h-12 items-center justify-between gap-3 px-4">
             <div className="min-w-0 truncate text-sm">
               <span className="font-medium">{ctx.org.name}</span>
-              <span className="ml-2 rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">FY {ctx.fy.label}</span>
+              <Link href="/settings/years" className="ml-2 rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground hover:text-foreground">
+                FY {ctx.fy.label}{ctx.fy.is_closed && ' · closed'}
+              </Link>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="hidden sm:inline">{ctx.user.email}</span>

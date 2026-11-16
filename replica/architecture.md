@@ -34,7 +34,7 @@ One database, one app. No microservices.
 ## 2. Data model
 
 `supabase/migrations/` — **43 tables, 2 views, posting + RPC functions**, tested on real Postgres
-(`npm run test:db`, 65 checks).
+(`npm run test:db`, 82 checks; `npm run test:unit`, 18 checks).
 
 | Area | Tables |
 |---|---|
@@ -167,7 +167,7 @@ bill-wise adjustment, general purchase, cash/bank/day book, lookups, passengers,
 Itineraries, policies, hotels + rates, activities, vehicles, routes, quotation builder with print,
 proforma, hotel vouchers.
 
-**M4 — Books & compliance**
+**M4 — Books & compliance** ✅ (group purchase, multi-party vouchers and pending lists moved to M5)
 Trial balance, P&L, balance sheet, outstanding/ageing, GSTR-1 (+JSON), GSTR-2, GSTR-3B, sales &
 purchase registers, group purchase, multi-line vouchers, year close & balance transfer.
 

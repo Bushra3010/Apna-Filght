@@ -263,6 +263,53 @@ const hv = (await one(U1, `select public.save_hotel_voucher($1,$2) id`, [org1, {
 ok((await db.query(`select voucher_no from hotel_vouchers where id=$1`, [hv])).rows[0].voucher_no === 'HV-0001', 'hotel voucher HV-0001 saved')
 await rejects(as(U1, `select public.save_hotel_voucher($1,$2)`, [org1, { voucher_date: '2026-11-22', property_name: 'X', guest_name: 'Y', check_in: '2026-12-24', check_out: '2026-12-20' }]), 'check-out before check-in rejected')
 
+// --- M4: books, GST, outstanding, adjustment, year-end
+const tbRows = (await as(U1, `select * from public.trial_balance($1,$2,'2026-04-01','2027-03-31')`, [org1, fy])).rows
+const tbDr = tbRows.reduce((s, r) => s + Math.max(Number(r.closing), 0), 0)
+const tbCr = tbRows.reduce((s, r) => s + Math.max(-Number(r.closing), 0), 0)
+ok(tbRows.length > 10 && tbDr === tbCr && tbRows.every((r) => r.top_group_name && r.nature), `trial balance: ${tbRows.length} ledgers, Dr = Cr = ₹${tbDr / 100}`)
+const profit = -tbRows.filter((r) => ['income', 'expense'].includes(r.nature)).reduce((s, r) => s + Number(r.closing), 0)
+const bsDiff = tbRows.filter((r) => ['asset', 'liability', 'equity'].includes(r.nature)).reduce((s, r) => s + Number(r.closing), 0)
+ok(bsDiff === profit, `balance sheet balances once profit ₹${profit / 100} is added to capital`)
+
+const gs = (await as(U1, `select * from public.gst_sales_lines($1,'2026-11-01','2026-11-30')`, [org1])).rows
+const docs = new Set(gs.map((r) => r.invoice_id))
+const outTax = gs.reduce((s, r) => s + (r.doc_kind === 'credit_note' ? -1 : 1) * (Number(r.igst) + Number(r.cgst) + Number(r.sgst)), 0)
+const outGl = (await db.query(`select sum(credit-debit)::bigint v from ledger_entries e join ledgers l on l.id=e.ledger_id
+  where l.org_id=$1 and l.system_key in ('cgst_output','sgst_output','igst_output') and e.entry_date between '2026-11-01' and '2026-11-30'`, [org1])).rows[0].v
+ok(docs.size === 5 && outTax === Number(outGl), `GST sales data: ${docs.size} documents (3 invoices, 2 credit notes; proformas excluded), output tax ₹${outTax / 100} matches the ledgers`)
+ok(gs.some((r) => r.doc_kind === 'credit_note' && r.ref_no === 'INV-0002'), 'credit notes carry their original invoice for CDNR/CDNUR')
+const hsn = (await as(U1, `select * from public.gst_hsn_lines($1,'2026-11-01','2026-11-30')`, [org1])).rows
+ok(hsn.some((r) => r.service === 'flight') && hsn.some((r) => r.service === 'tour'), 'HSN/SAC summary groups by service')
+const gp = (await as(U1, `select * from public.gst_purchase_lines($1,'2026-11-01','2026-11-30')`, [org1])).rows
+const rent = gp.find((r) => r.supplier_name === 'Landlord')
+ok(rent && Number(rent.cgst) === 180000 && Number(rent.tds) === 200000, 'purchase GST data includes the rent bill with ITC and TDS')
+
+const outs = (await as(U1, `select * from public.party_outstanding($1,$2,'2026-11-30','customer')`, [org1, fy])).rows
+const ravi = outs.find((r) => r.ledger_name === 'Ravi Kumar')
+const raviGl = (await as(U1, `select balance from public.ledger_statement($1,$2,$3,'2026-04-01','2026-11-30')`, [org1, fy, cust])).rows
+ok(ravi && Number(ravi.balance) === Number(raviGl[raviGl.length - 1].balance) && Number(ravi.open_bills) >= 1, `client outstanding ₹${Number(ravi?.balance) / 100} with ${ravi?.open_bills} open bill(s)`)
+
+const rcpt = (await one(U1, `select public.save_receipt($1,$2) id`, [org1, { party_ledger_id: cust, cash_bank_ledger_id: bank, amount: 50000, voucher_date: '2026-11-28', mode: 'upi' }])).id
+ok((await as(U1, `select unadjusted from v_unadjusted_vouchers where id=$1`, [rcpt])).rows[0]?.unadjusted == 50000, 'receipt on account shows as unadjusted')
+await rejects(as(U1, `select public.allocate_voucher($1,$2,$3)`, [org1, rcpt, [{ invoice_id: inv2, amount: 60000 }]]), 'adjusting more than the receipt rejected')
+await one(U1, `select public.allocate_voucher($1,$2,$3)`, [org1, rcpt, [{ invoice_id: inv2, amount: 50000 }]])
+ok(Number((await one(U1, `select balance from v_invoice_balance where id=$1`, [inv2])).balance) === 94400 - 50000, 'later adjustment reduces the invoice balance')
+
+const fy2 = (await one(U1, `select public.create_next_year($1) id`, [org1])).id
+const FY2 = (await db.query(`select label, starts_on::text s from financial_years where id=$1`, [fy2])).rows[0]
+const series = (await db.query(`select count(*)::int n from doc_series where fy_id=$1 and prefix='INV-'`, [fy2])).rows[0].n
+ok(FY2.label === '2027-28' && FY2.s === '2027-04-01' && series === 1, `next year ${FY2.label} created with number series`)
+await rejects(as(U2, `select public.carry_forward($1,$2)`, [org1, fy]), 'another company cannot carry forward')
+const cf = (await one(U1, `select public.carry_forward($1,$2) r`, [org1, fy])).r
+const ob = (await db.query(`select sum(amount)::bigint s, count(*)::int n from opening_balances where fy_id=$1`, [fy2])).rows[0]
+ok(Number(ob.s) === 0 && ob.n === cf.ledgers && cf.profit === profit, `carried forward ${ob.n} balances; profit ₹${cf.profit / 100} moved to capital; opening balances net to zero`)
+await one(U1, `select public.close_year($1,$2)`, [org1, fy])
+await rejects(as(U1, `select public.save_receipt($1,$2)`, [org1, { party_ledger_id: cust, cash_bank_ledger_id: bank, amount: 100, voucher_date: '2026-12-01' }]), 'posting into a closed year rejected')
+await rejects(as(U1, `insert into opening_balances (org_id, fy_id, ledger_id, amount) values ($1,$2,$3,100)`, [org1, fy, bank]), 'opening balances of a closed year are locked')
+await one(U1, `select public.reopen_year($1,$2)`, [org1, fy])
+ok(!(await db.query(`select is_closed from financial_years where id=$1`, [fy])).rows[0].is_closed, 'owner can reopen a year')
+
 // --- guards
 await rejects(as(U1, `insert into ledger_entries (org_id,fy_id,entry_date,ledger_id,debit,source_type,source_id,doc_no) values ($1,$2,'2026-11-17',$3,1,'voucher',gen_random_uuid(),'x')`, [org1, fy, bank]), 'direct GL write blocked')
 ok((await as(U1, `delete from invoices where id=$1 returning id`, [inv])).rows.length === 0, 'posted invoice cannot be deleted')

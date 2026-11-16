@@ -3,7 +3,7 @@
 Travel ERP + CRM for Indian travel agencies: leads and follow-ups, flight invoices with GST,
 receipts, double-entry accounts and ledger statements. Built with Next.js and Supabase.
 
-**What's in it (Milestones 1–3):**
+**What's in it (Milestones 1–4):**
 - **CRM:** leads with services, pax, source, assignment, status and follow-ups → quotation → proforma → invoice.
 - **Holiday packages:** hotels with dated room rates (class, room category, meal plan), activity rates,
   vehicles priced per km, routes, policies, and day-wise itineraries. The quotation builder prices a
@@ -18,7 +18,13 @@ receipts, double-entry accounts and ledger statements. Built with Next.js and Su
   cancellation charges with GST (posted to their own income ledger), refund-due tracking.
 - **Purchases:** general purchase bills (rent, utilities…) with input GST and TDS.
 - **Vouchers:** receipts and payments with bill-wise adjustment, contra, journal.
-- **Accounts:** ledger statement, cash book, bank book, day book — all double-entry.
+- **Accounts:** ledger statement, cash book, bank book, day book, trial balance, profit & loss,
+  balance sheet, opening balances — all double-entry.
+- **Reports:** receivables / payables with ageing, open bills per party, bill adjustment for
+  receipts kept on account, sales register with margin, purchase register, CSV export.
+- **GST:** GSTR-1 (B2B, B2CL, B2CS, CDNR, CDNUR, nil/exempt, SAC summary) with portal JSON,
+  GSTR-2 purchase / ITC listing, GSTR-3B summary.
+- **Year-end:** create the next financial year, carry balances forward, close and reopen years.
 - **Masters:** ledgers, passengers (passport expiry flags), pick-lists (booked by, meal plans…).
 - **Dashboard:** sales, margin, receivable, receipts, monthly sales chart, receivable ageing.
 
@@ -50,7 +56,7 @@ Requires Node.js 22+ (see `.nvmrc`).
 ## Checks
 
 ```bash
-npm run test:db     # applies every migration to in-memory Postgres and tests posting, GST, RLS
+npm test            # unit tests (GST maths, GST returns, statements) + database tests
 npm run typecheck
 npm run lint
 npm run build

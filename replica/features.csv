@@ -1,7 +1,7 @@
 id,area,feature,priority,milestone,status
 F01,Platform,Sign up / sign in (email + password; Google later),must,M1,done
 F02,Platform,Organisation (company) with members and invites,must,M1,"partial: create company; invites in M5"
-F03,Platform,Financial year: create / switch / close with balance transfer,must,M1/M4,"partial: auto-created; switch/close in M4"
+F03,Platform,Financial year: create / switch / close with balance transfer,must,M1/M4,done
 F04,Platform,Roles with per-module permissions,must,M5,todo
 F05,Platform,Document number series per type and year,must,M1,done
 F06,Platform,Company setup: profile / GSTIN / PAN / bank details / invoice terms / logo,must,M1,"partial: profile+GSTIN+terms; bank/logo in M2"
@@ -33,22 +33,22 @@ F31,Billing,Multiple printing (bulk PDF),could,M6,todo
 F32,Billing,E-invoice (IRN) via GSP API,could,M6,todo
 F33,Billing,Online payment link (Razorpay or Cashfree official API) + webhook to receipt,should,M6,todo
 F34,Purchase,General purchase bill,must,M2,done
-F35,Purchase,Group purchase / fixed departure with pax allocation,should,M4,todo
+F35,Purchase,Group purchase / fixed departure with pax allocation,should,M5,todo
 F36,Purchase,Excel import of supplier / GDS booking reports -> invoices,should,M6,todo
-F37,Purchase,Pending purchase / pending billing lists,should,M4,todo
+F37,Purchase,Pending purchase / pending billing lists,should,M5,todo
 F38,Vouchers,Receipt / payment / contra / journal,must,M1 (receipt) / M2,done
-F39,Vouchers,Multi-line receipt / payment,should,M4,todo
-F40,Vouchers,Bill adjustment (allocate receipts to invoices),must,M2,"partial: adjust while entering receipts/payments; standalone screen in M4"
+F39,Vouchers,Multi-line receipt / payment,should,M5,todo
+F40,Vouchers,Bill adjustment (allocate receipts to invoices),must,M2,done
 F41,Vouchers,Excel import of vouchers / gateway receipts,could,M6,todo
 F42,Accounts,Ledger statement,must,M1,done
 F43,Accounts,Cash book / bank book / day book,must,M2,done
-F44,Accounts,Trial balance (opening + period) with group drill-down,must,M4,todo
-F45,Accounts,Profit & loss / balance sheet,must,M4,todo
-F46,Outstanding,Receivable / payable / day-wise ageing / bill-wise,must,M4,todo
-F47,GST,GSTR-1 sections + JSON export,must,M4,todo
-F48,GST,GSTR-2 purchase tax / GSTR-3B summary,should,M4,todo
-F49,Reports,Sales register with KPIs / margin by type / top parties / Excel export,must,M4,todo
-F50,Reports,Purchase register / purchase return,should,M4,todo
+F44,Accounts,Trial balance (opening + period) with group drill-down,must,M4,done
+F45,Accounts,Profit & loss / balance sheet,must,M4,done
+F46,Outstanding,Receivable / payable / day-wise ageing / bill-wise,must,M4,done
+F47,GST,GSTR-1 sections + JSON export,must,M4,"partial: all sections + JSON; verify JSON in the GST offline tool before first filing"
+F48,GST,GSTR-2 purchase tax / GSTR-3B summary,should,M4,done
+F49,Reports,Sales register with KPIs / margin by type / top parties / Excel export,must,M4,done
+F50,Reports,Purchase register / purchase return,should,M4,done
 F51,Alerts,Invalid GST / loss-making invoices & credit notes / sale-purchase mismatches,should,M5,todo
 F52,Dashboard,ERP dashboard: sales / receivable / payable / cash / bank / monthly chart / ageing / next 5 days,must,M2,done
 F53,Platform,Message templates (email/WhatsApp text) for documents,could,M6,todo
