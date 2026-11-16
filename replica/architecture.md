@@ -18,7 +18,7 @@ Storage) + Tailwind/shadcn UI + Resend email + Razorpay or Cashfree payment link
 | Forms | react-hook-form + zod | Same zod schema validates client and server |
 | Database | Supabase Postgres | Accounting needs real transactions, constraints and SQL reporting |
 | Data access | supabase-js with generated types; SQL functions for posting & reports | RLS stays the single tenancy guard; reports run in the database, not in JS loops |
-| Migrations | Supabase CLI (`supabase/migrations/*.sql`) | Plain SQL, reviewable, matches `schema.sql` |
+| Migrations | Supabase CLI (`supabase/migrations/*.sql`) | Plain SQL, reviewable, applied in order |
 | Auth | Supabase Auth (email + password, Google later) | Same JWT drives RLS via `auth.uid()` |
 | Files | Supabase Storage (private buckets) | Logos, passenger documents, import files |
 | PDF | `@react-pdf/renderer` in a route handler | Invoices, credit notes, vouchers, quotations, statements |
@@ -33,8 +33,8 @@ One database, one app. No microservices.
 
 ## 2. Data model
 
-`schema.sql` — **43 tables, 14 functions, 2 views**, tested on real Postgres
-(`tests/schema.test.mjs`, 17 checks).
+`supabase/migrations/` — **43 tables, 2 views, posting + RPC functions**, tested on real Postgres
+(`npm run test:db`, 32 checks).
 
 | Area | Tables |
 |---|---|
@@ -185,6 +185,6 @@ app/(app)/[org]/dashboard | crm/... | billing/... | purchase/... | vouchers/... 
 app/api/pdf, api/gst, api/webhooks, api/cron
 components/ui (shadcn), components/data-table, components/forms
 lib/supabase (server/client), lib/money.ts, lib/gst.ts, lib/permissions.ts
-supabase/migrations/0001_init.sql  (= replica/schema.sql)
-supabase/seed.sql                   (countries, Indian states with GST codes, cities, airlines)
+supabase/migrations/*.sql           (schema, RPCs, reference data)
+tests/db.test.mjs                   (runs all migrations on PGlite)
 ```

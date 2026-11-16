@@ -1172,9 +1172,9 @@ create view v_invoice_line_margin with (security_invoker = true) as
 select l.id, l.org_id, l.invoice_id, i.invoice_no, i.invoice_date, i.bill_type, i.doc_kind,
        i.party_ledger_id, l.supplier_ledger_id, l.service,
        l.net_sale - l.cgst - l.sgst - l.igst                      as sale_ex_tax,
-       l.purchase_gross - l.purchase_gst - l.commission + l.tds   as cost_ex_tax,
+       l.purchase_gross - l.purchase_gst - l.commission           as cost_ex_tax,
        (l.net_sale - l.cgst - l.sgst - l.igst)
-         - (l.purchase_gross - l.purchase_gst - l.commission + l.tds) as margin
+         - (l.purchase_gross - l.purchase_gst - l.commission) as margin
 from invoice_lines l join invoices i on i.id = l.invoice_id
 where i.status = 'posted';
 
