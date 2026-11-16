@@ -1,7 +1,6 @@
 'use client'
 
-import { useActionState, useMemo, useRef, useState } from 'react'
-import { useFormStatus } from 'react-dom'
+import { startTransition, useActionState, useMemo, useRef, useState } from 'react'
 import { CheckCircle2, CircleAlert, CircleMinus, Download, FileUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,7 +31,7 @@ export function ImportWizard({
   /** extra defaults (selects / checkboxes) rendered inside the form */
   children?: React.ReactNode
 }) {
-  const [state, run] = useActionState(action, undefined)
+  const [state, run, pending] = useActionState(action, undefined)
   const formRef = useRef<HTMLFormElement>(null)
   const [file, setFile] = useState<{ name: string; headers: string[]; rows: Record<string, string>[] } | null>(null)
   const [mapping, setMapping] = useState<Record<string, string>>({})
@@ -93,7 +92,17 @@ export function ImportWizard({
   const counts = showResult ? { ok: state.rows!.filter((r) => r.status === 'ok').length, skip: state.rows!.filter((r) => r.status === 'skip').length, error: state.rows!.filter((r) => r.status === 'error').length } : null
 
   return (
-    <form ref={formRef} action={(fd) => { setCheckedKey(key); return run(fd) }} className="grid gap-6">
+    <form
+      ref={formRef}
+      className="grid gap-6"
+      // submit by hand: a form `action` would reset the option fields after every check
+      onSubmit={(e) => {
+        e.preventDefault()
+        const fd = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter)
+        setCheckedKey(key)
+        startTransition(() => run(fd))
+      }}
+    >
       <input type="hidden" name="payload" value={payload} />
 
       <section className="rounded-3xl bg-card p-5 md:p-6">
@@ -148,8 +157,8 @@ export function ImportWizard({
 
       {file && (
         <div className="flex flex-wrap items-center gap-3">
-          <Run mode="preview" disabled={missing.length > 0}>Check rows</Run>
-          <Run mode="commit" disabled={missing.length > 0 || !counts || counts.ok === 0 || state?.mode === 'commit'} variant="default">Import {counts ? `${counts.ok} row(s)` : ''}</Run>
+          <Run mode="preview" pending={pending} disabled={missing.length > 0}>Check rows</Run>
+          <Run mode="commit" pending={pending} disabled={missing.length > 0 || !counts || counts.ok === 0 || state?.mode === 'commit'} variant="default">Import {counts ? `${counts.ok} row(s)` : ''}</Run>
           {missing.length > 0 && <span className="text-sm text-destructive">Match {missing.map((f) => f.label).join(', ')} first</span>}
           {!counts && missing.length === 0 && <span className="text-sm text-muted-foreground">Check the rows first; nothing is saved until you import.</span>}
         </div>
@@ -188,8 +197,7 @@ export function ImportWizard({
   )
 }
 
-function Run({ mode, disabled, variant = 'outline', children }: { mode: 'preview' | 'commit'; disabled?: boolean; variant?: 'outline' | 'default'; children: React.ReactNode }) {
-  const { pending } = useFormStatus()
+function Run({ mode, pending, disabled, variant = 'outline', children }: { mode: 'preview' | 'commit'; pending: boolean; disabled?: boolean; variant?: 'outline' | 'default'; children: React.ReactNode }) {
   return (
     <Button type="submit" name="mode" value={mode} variant={variant} disabled={disabled || pending}>
       {pending ? 'Working…' : children}
