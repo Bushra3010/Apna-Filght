@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { DateInput } from '@/components/date-input'
 import { Field, FormError, NativeSelect, SubmitButton } from '@/components/form'
 import { LinkButton } from '@/components/link-button'
 import { FOLLOWUP_ACTIONS, LEAD_SERVICES, LEAD_SOURCES, LEAD_STATUSES, TIME_SLOTS } from '@/lib/leads'
@@ -95,7 +96,7 @@ export function LeadForm({
             <Input id="start_place" name="start_place" defaultValue={lead.start_place ?? ''} placeholder="e.g. Mumbai" />
           </Field>
           <Field label="Travel date" htmlFor="travel_date" hint="Leave empty if not decided yet">
-            <Input id="travel_date" name="travel_date" type="date" defaultValue={lead.travel_date ?? ''} />
+            <DateInput id="travel_date" name="travel_date" defaultValue={lead.travel_date ?? ''} />
           </Field>
           <Field label="Adults" htmlFor="adults" hint={total > pax.adults ? `${total} people in all` : undefined}>
             <Input id="adults" name="adults" type="number" min={1} value={pax.adults} onChange={(e) => setPax({ ...pax, adults: +e.target.value })} />
@@ -107,7 +108,7 @@ export function LeadForm({
         <h2 className="text-sm font-medium">{isNew ? 'When to call them next?' : 'Add another follow-up'}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Date" htmlFor="followup_date" required={isNew} hint={isNew ? undefined : 'Leave empty if not needed'}>
-            <Input id="followup_date" name="followup_date" type="date" defaultValue={isNew ? followupDate : undefined} required={isNew} />
+            <DateInput id="followup_date" name="followup_date" defaultValue={isNew ? followupDate : undefined} required={isNew} />
           </Field>
           <Field label="Time" htmlFor="followup_slot">
             <NativeSelect id="followup_slot" name="followup_slot" defaultValue="09:00">

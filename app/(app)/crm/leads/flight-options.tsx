@@ -4,9 +4,11 @@ import { useState, useTransition } from 'react'
 import { Plane, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, NativeSelect } from '@/components/form'
+import { Field } from '@/components/form'
+import { AirportPicker } from '@/components/airport-picker'
+import { DateInput } from '@/components/date-input'
 import { WhatsAppButton } from '@/components/whatsapp-button'
-import { AIRPORTS, airportCity, flightOptionsMessage, type Flight } from '@/lib/flights'
+import { airportCity, flightOptionsMessage, type Flight } from '@/lib/flights'
 import { paiseToInput } from '@/lib/money'
 import { addFlightOptions, findFlights, removeFlightOption, setFlightOptionPrice } from './flight-actions'
 
@@ -94,19 +96,13 @@ export function FlightOptions({
 
       <div className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto_auto]">
         <Field label="From" htmlFor="fo_from">
-          <NativeSelect id="fo_from" value={from} onChange={(e) => setFrom(e.target.value)}>
-            <option value="">Choose city</option>
-            {AIRPORTS.map(([c, city]) => <option key={c} value={c}>{city} ({c})</option>)}
-          </NativeSelect>
+          <AirportPicker id="fo_from" value={from} onChange={setFrom} />
         </Field>
         <Field label="To" htmlFor="fo_to">
-          <NativeSelect id="fo_to" value={to} onChange={(e) => setTo(e.target.value)}>
-            <option value="">Choose city</option>
-            {AIRPORTS.map(([c, city]) => <option key={c} value={c}>{city} ({c})</option>)}
-          </NativeSelect>
+          <AirportPicker id="fo_to" value={to} onChange={setTo} />
         </Field>
         <Field label="Date" htmlFor="fo_date">
-          <Input id="fo_date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DateInput id="fo_date" value={date} onChange={(e) => setDate(e.target.value)} className="sm:w-44" />
         </Field>
         <Button type="button" onClick={search} disabled={busy || !from || !to || !date}>{busy && !found ? 'Searching…' : 'Find flights'}</Button>
       </div>

@@ -153,4 +153,9 @@
   input[type='time']::-webkit-calendar-picker-indicator {
     filter: invert(0.8);
   }
+  /* <DateInput> draws its own calendar icon and opens the calendar on click, so the browser's icon is hidden there. */
+  .date-field input::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+  }
 }
