@@ -388,6 +388,8 @@ await rejects(as(U2, `update message_templates set body='x' where org_id=$1 retu
 const fl = (await one(U1, `select public.save_lead($1,$2) id`, [org1, { guest_name: 'Flight Guest', phone: '9800000000', travel_date_open: true, adults: 1, status: 'initial' }])).id
 await as(U1, `insert into lead_flight_options (org_id, lead_id, airline, flight_no, from_code, to_code, travel_date, depart_time, price) values ($1,$2,'IndiGo','6E 2135','BOM','DEL','2026-12-01','06:00',550000)`, [org1, fl])
 ok((await as(U1, `select 1 from lead_flight_options where lead_id=$1`, [fl])).rows.length === 1, 'flight option saved on a lead')
+await as(U1, `insert into lead_flight_options (org_id, lead_id, airline, flight_no, from_code, to_code, travel_date, depart_time, arrive_time, via_code, layover_min, arrive_day_offset) values ($1,$2,'IndiGo + Emirates','6E 1461 + EK 7','DEL','LHR','2026-12-01','06:00','18:30','DXB',135,0)`, [org1, fl])
+ok((await one(U1, `select via_code, arrive_day_offset from lead_flight_options where lead_id=$1 and via_code is null`, [fl])).arrive_day_offset === 0, 'a direct flight option has no stop and lands the same day by default')
 ok((await as(U2, `select 1 from lead_flight_options where org_id=$1`, [org1])).rows.length === 0, "another company's flight options are hidden")
 await rejects(as(U2, `insert into lead_flight_options (org_id, lead_id, airline, flight_no, from_code, to_code, travel_date) values ($1,$2,'x','x1','BOM','DEL','2026-12-01')`, [org1, fl]), 'non-member cannot add flight options')
 

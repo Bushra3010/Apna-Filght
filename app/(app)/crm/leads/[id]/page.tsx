@@ -24,7 +24,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     supabase.from('invoices').select('id, invoice_no, invoice_date, total').eq('lead_id', id).order('invoice_date'),
     supabase
       .from('lead_flight_options')
-      .select('id, airline, flight_no, from_code, to_code, travel_date, depart_time, arrive_time, price')
+      .select('*')
       .eq('lead_id', id)
       .order('travel_date')
       .order('depart_time'),
