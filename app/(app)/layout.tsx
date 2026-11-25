@@ -3,7 +3,7 @@ import { Bell, LogOut, Plane } from 'lucide-react'
 import { getContext } from '@/lib/context'
 import { loadAlerts } from '@/lib/alerts'
 import { signOut } from '../(auth)/actions'
-import { Rail, Tabs } from '@/components/shell/nav'
+import { Sidebar, Tabs } from '@/components/shell/nav'
 import { Button } from '@/components/ui/button'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -13,11 +13,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-svh gap-6 px-4 py-4 md:px-6 md:py-6 print:block print:p-0">
-      <aside className="sticky top-6 hidden h-[calc(100svh-3rem)] w-11 shrink-0 flex-col items-center gap-6 md:flex print:hidden">
-        <Link href="/dashboard" aria-label="Apna Flight home" className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-          <Plane className="size-5" />
+      <aside className="sticky top-6 hidden h-[calc(100svh-3rem)] w-60 shrink-0 flex-col gap-4 rounded-3xl bg-card p-4 md:flex print:hidden">
+        <Link href="/dashboard" className="flex items-center gap-3 px-1">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <Plane className="size-5" />
+          </span>
+          <span className="text-base font-bold tracking-tight">Apna Flight</span>
         </Link>
-        <Rail />
+        <Sidebar />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -25,7 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard" aria-label="Apna Flight home" className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground md:hidden">
             <Plane className="size-5" />
           </Link>
-          <div className="order-last min-w-0 basis-full md:order-none md:basis-auto md:flex-1">
+          <div className="order-last min-w-0 basis-full md:hidden">
             <Tabs />
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">

@@ -1,12 +1,19 @@
 export const LEAD_STATUSES = [
-  ['initial', 'Initial'],
-  ['active', 'Active'],
-  ['proposal', 'Proposal'],
-  ['negotiation', 'Negotiation'],
-  ['pipeline', 'Pipeline'],
+  ['initial', 'New'],
+  ['active', 'Talking'],
+  ['proposal', 'Quote sent'],
+  ['negotiation', 'Negotiating'],
+  ['pipeline', 'Ready to book'],
   ['booked', 'Booked'],
   ['not_interested', 'Not interested'],
   ['fake', 'Fake'],
+] as const
+
+// The list page groups the eight stages into three simple tabs.
+export const LEAD_VIEWS = [
+  { key: 'open', label: 'In progress', statuses: ['initial', 'active', 'proposal', 'negotiation', 'pipeline'] },
+  { key: 'booked', label: 'Booked', statuses: ['booked'] },
+  { key: 'lost', label: 'Lost', statuses: ['not_interested', 'fake'] },
 ] as const
 
 export const LEAD_SERVICES = [

@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
   ArrowLeftRight, Banknote, BarChart3, BedDouble, BookOpen, CalendarDays, CalendarRange, Car, ClipboardList, Clock,
   Building2, Coins, Contact, FileMinus, FileSignature, FileSpreadsheet, FileText, Hotel, Landmark, LayoutGrid, Link2, List,
   Luggage, Map as MapIcon, NotebookPen, PieChart, Plane, Receipt, ReceiptIndianRupee, Route, Scale, ScrollText,
   Settings, ShoppingCart, Sparkles, Ticket, TrendingUp, Users, Wallet, Gauge, Shuffle, Bell, UsersRound, PlaneTakeoff,
-  FileUp, Printer, MessageCircle, type LucideIcon,
+  FileUp, Printer, MessageCircle, ChevronDown, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -113,40 +114,84 @@ function activeSection(path: string) {
   return SECTIONS.find((s) => s.items.some((i) => path === i.href || path.startsWith(i.href + '/') || path.startsWith(i.href + '?'))) ?? SECTIONS[0]
 }
 
-/** Slim icon rail (desktop). */
-export function Rail() {
+const isOn = (path: string, href: string) => path === href || path.startsWith(href + '/')
+
+/** Desktop sidebar: every area is a menu that opens to show its pages. */
+export function Sidebar() {
   const path = usePathname()
   const current = activeSection(path)
-  const link = (s: Section) => (
-    <Link
-      key={s.key}
-      href={s.items[0].href}
-      title={s.label}
-      aria-label={s.label}
-      aria-current={s.key === current.key ? 'page' : undefined}
-      className={cn(
-        'flex size-11 items-center justify-center rounded-full bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
-        s.key === current.key && 'bg-secondary text-primary ring-1 ring-primary/50 hover:bg-secondary hover:text-primary',
-      )}
-    >
-      <s.icon className="size-[18px]" />
-    </Link>
-  )
+  // Only what the user opened or closed by hand; the area of the current page is open by default.
+  const [toggled, setToggled] = useState<Record<string, boolean>>({})
+
   return (
-    <nav aria-label="Areas" className="flex flex-1 flex-col items-center gap-3">
-      {SECTIONS.filter((s) => !s.bottom).map(link)}
-      <div className="mt-auto flex flex-col items-center gap-3">{SECTIONS.filter((s) => s.bottom).map(link)}</div>
+    <nav aria-label="Main menu" className="-mx-2 flex flex-1 flex-col gap-1 overflow-y-auto px-2 pb-2 [scrollbar-width:thin]">
+      {SECTIONS.map((s) => {
+        const active = s.key === current.key
+        const row = cn(
+          'flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+          active && 'text-foreground',
+        )
+        if (s.items.length === 1) {
+          return (
+            <Link
+              key={s.key}
+              href={s.items[0].href}
+              aria-current={active ? 'page' : undefined}
+              className={cn(row, active && 'bg-primary font-semibold text-primary-foreground hover:bg-primary hover:text-primary-foreground')}
+            >
+              <s.icon className="size-[18px] shrink-0" />
+              {s.label}
+            </Link>
+          )
+        }
+        const open = toggled[s.key] ?? active
+        return (
+          <div key={s.key}>
+            <button
+              type="button"
+              aria-expanded={open}
+              onClick={() => setToggled((t) => ({ ...t, [s.key]: !open }))}
+              className={row}
+            >
+              <s.icon className={cn('size-[18px] shrink-0', active && 'text-primary')} />
+              <span className="flex-1 text-left">{s.label}</span>
+              <ChevronDown className={cn('size-4 shrink-0 transition-transform', open && 'rotate-180')} />
+            </button>
+            {open && (
+              <ul className="mt-1 mb-2 ml-[21px] grid gap-0.5 border-l border-border pl-3">
+                {s.items.map((i) => {
+                  const on = isOn(path, i.href)
+                  return (
+                    <li key={i.href}>
+                      <Link
+                        href={i.href}
+                        aria-current={on ? 'page' : undefined}
+                        className={cn(
+                          'flex h-9 items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
+                          on && 'bg-primary font-semibold text-primary-foreground hover:bg-primary hover:text-primary-foreground',
+                        )}
+                      >
+                        {i.label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+        )
+      })}
     </nav>
   )
 }
 
-/** Pill tabs for the current area; on phones also a row to switch area. */
+/** Phones only (the sidebar is hidden there): a row to switch area, then pill tabs for its pages. */
 export function Tabs() {
   const path = usePathname()
   const current = activeSection(path)
   return (
-    <div className="grid min-w-0 gap-2">
-      <nav aria-label="Areas" className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+    <div className="grid min-w-0 gap-2 md:hidden">
+      <nav aria-label="Areas" className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {SECTIONS.map((s) => (
           <Link
             key={s.key}
@@ -163,7 +208,7 @@ export function Tabs() {
       </nav>
       <nav aria-label={current.label} className="-mx-1 flex gap-2 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {current.items.map(({ href, label, icon: Icon }) => {
-          const on = path === href || path.startsWith(href + '/')
+          const on = isOn(path, href)
           return (
             <Link
               key={href}

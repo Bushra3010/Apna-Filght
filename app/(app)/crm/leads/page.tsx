@@ -6,26 +6,32 @@ import { LinkButton } from '@/components/link-button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { LEAD_SERVICES, LEAD_SOURCES, LEAD_STATUSES, istDateTime, label, statusTone } from '@/lib/leads'
+import { LEAD_SERVICES, LEAD_SOURCES, LEAD_STATUSES, LEAD_VIEWS, istDateTime, label, statusTone } from '@/lib/leads'
 import { cn } from '@/lib/utils'
 
 export const metadata = { title: 'Leads' }
 
-type SP = { status?: string; service?: string; source?: string; q?: string; due?: string; who?: string }
+type SP = { view?: string; status?: string; service?: string; source?: string; q?: string; due?: string; who?: string }
+
+const chip = 'rounded-full border border-border bg-card px-3.5 py-1.5 text-sm'
+const chipOn = 'border-primary bg-primary/10'
+const select = 'h-10 rounded-xl border border-input bg-muted px-3 text-sm'
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams
   const { supabase, org, member } = await getContext()
   const { data: team } = await supabase.from('org_members').select('id, display_name').eq('org_id', org.id).eq('is_active', true).order('display_name')
+  const view = LEAD_VIEWS.find((v) => v.key === sp.view)
 
   let query = supabase
     .from('leads')
-    .select('id, lead_no, enquiry_date, guest_name, phone, start_place, travel_date, travel_date_open, services, adults, children_above_12, children_6_12, infants, status, next_followup_at, last_followup_at, org_members!leads_assigned_to_fkey(display_name)')
+    .select('id, lead_no, guest_name, phone, start_place, travel_date, travel_date_open, services, adults, children_above_12, children_6_12, infants, status, next_followup_at')
     .eq('org_id', org.id)
     .order('enquiry_date', { ascending: false })
     .order('lead_no', { ascending: false })
     .limit(100)
   if (sp.status) query = query.eq('status', sp.status)
+  else if (view) query = query.in('status', [...view.statuses])
   if (sp.service) query = query.contains('services', [sp.service])
   if (sp.source) query = query.eq('source', sp.source)
   if (sp.who === 'me') query = query.eq('assigned_to', member.id)
@@ -41,50 +47,69 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     query,
     supabase.from('leads').select('status').eq('org_id', org.id),
   ])
-  const counts = new Map<string, number>()
-  all?.forEach((r) => counts.set(r.status, (counts.get(r.status) ?? 0) + 1))
+  const countOf = (statuses: readonly string[]) => all?.filter((r) => statuses.includes(r.status)).length ?? 0
 
-  const href = (patch: Partial<SP>) => {
-    const p = new URLSearchParams(Object.entries({ ...sp, ...patch }).filter(([, v]) => v) as [string, string][])
+  // The tabs are the main way to narrow the list, so picking one clears the other tab choices.
+  const tab = (patch: Partial<SP>) => {
+    const p = new URLSearchParams(
+      Object.entries({ ...sp, view: undefined, status: undefined, due: undefined, ...patch }).filter(([, v]) => v) as [string, string][],
+    )
     return `/crm/leads${p.size ? `?${p}` : ''}`
   }
+  const moreOpen = Boolean(sp.status || sp.service || sp.source || sp.who)
+  const filtered = Boolean(moreOpen || sp.q || sp.view || sp.due)
 
   return (
     <>
-      <PageHeader title="Leads" description="Travel enquiries and follow-ups" actions={<LinkButton href="/crm/leads/new">New lead</LinkButton>} />
+      <PageHeader title="Leads" description="Customer enquiries and who to call next" actions={<LinkButton href="/crm/leads/new">+ New lead</LinkButton>} />
 
       <div className="mb-4 flex flex-wrap gap-1.5">
-        <Link href={href({ status: undefined })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', !sp.status && 'border-primary bg-primary/10')}>
+        <Link href={tab({})} className={cn(chip, !sp.view && !sp.status && !sp.due && chipOn)}>
           All <span className="text-muted-foreground">{all?.length ?? 0}</span>
         </Link>
-        {LEAD_STATUSES.map(([v, l]) => (
-          <Link key={v} href={href({ status: v })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', sp.status === v && 'border-primary bg-primary/10')}>
-            {l} <span className="text-muted-foreground">{counts.get(v) ?? 0}</span>
+        <Link href={tab({ due: 'today' })} className={cn(chip, sp.due && chipOn)}>
+          Call today
+        </Link>
+        {LEAD_VIEWS.map((v) => (
+          <Link key={v.key} href={tab({ view: v.key })} className={cn(chip, sp.view === v.key && !sp.status && chipOn)}>
+            {v.label} <span className="text-muted-foreground">{countOf(v.statuses)}</span>
           </Link>
         ))}
-        <Link href={href({ due: sp.due ? undefined : 'today' })} className={cn('rounded-full border border-border bg-card px-3.5 py-1.5 text-sm', sp.due && 'border-primary bg-primary/10')}>
-          Follow-up due
-        </Link>
       </div>
 
-      <form className="mb-4 flex flex-wrap gap-2">
-        {sp.status && <input type="hidden" name="status" value={sp.status} />}
-        <Input name="q" defaultValue={sp.q} placeholder="Name, phone or lead no." className="max-w-xs" />
-        <select name="service" defaultValue={sp.service ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
-          <option value="">All services</option>
-          {LEAD_SERVICES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <select name="source" defaultValue={sp.source ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
-          <option value="">All sources</option>
-          {LEAD_SOURCES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <select name="who" defaultValue={sp.who ?? ''} className="h-10 rounded-xl border border-input bg-muted px-3 text-sm">
-          <option value="">Everyone</option>
-          <option value="me">Assigned to me</option>
-          <option value="none">Unassigned</option>
-          {team?.filter((t) => t.id !== member.id).map((t) => <option key={t.id} value={t.id}>{t.display_name}</option>)}
-        </select>
-        <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Filter</button>
+      <form className="mb-4 grid gap-2">
+        {sp.view && <input type="hidden" name="view" value={sp.view} />}
+        {sp.due && <input type="hidden" name="due" value={sp.due} />}
+        <div className="flex flex-wrap gap-2">
+          <Input name="q" defaultValue={sp.q} placeholder="Search name or phone" className="max-w-xs" />
+          <button className="h-10 rounded-full border border-border bg-secondary px-4 text-sm font-semibold hover:bg-accent">Search</button>
+          {filtered && (
+            <Link href="/crm/leads" className="flex h-10 items-center px-2 text-sm text-muted-foreground hover:underline">Clear</Link>
+          )}
+        </div>
+        <details open={moreOpen} className="text-sm">
+          <summary className="w-fit cursor-pointer text-muted-foreground hover:text-foreground">More filters</summary>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <select name="status" defaultValue={sp.status ?? ''} className={select}>
+              <option value="">Any stage</option>
+              {LEAD_STATUSES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <select name="service" defaultValue={sp.service ?? ''} className={select}>
+              <option value="">All services</option>
+              {LEAD_SERVICES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <select name="source" defaultValue={sp.source ?? ''} className={select}>
+              <option value="">All sources</option>
+              {LEAD_SOURCES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <select name="who" defaultValue={sp.who ?? ''} className={select}>
+              <option value="">Everyone&apos;s leads</option>
+              <option value="me">My leads</option>
+              <option value="none">Not assigned</option>
+              {team?.filter((t) => t.id !== member.id).map((t) => <option key={t.id} value={t.id}>{t.display_name}</option>)}
+            </select>
+          </div>
+        </details>
       </form>
 
       {leads?.length ? (
@@ -92,38 +117,34 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Lead</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead>Travel</TableHead>
-                <TableHead>Services</TableHead>
-                <TableHead className="text-right">Pax</TableHead>
-                <TableHead>Next follow-up</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Assigned</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Trip</TableHead>
+                <TableHead>Next call</TableHead>
+                <TableHead>Stage</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {leads.map((l) => {
                 const overdue = l.next_followup_at && new Date(l.next_followup_at) < new Date()
+                const pax = l.adults + l.children_above_12 + l.children_6_12 + l.infants
+                const when = l.travel_date_open || !l.travel_date ? 'Date not fixed' : new Date(l.travel_date).toLocaleDateString('en-IN', { dateStyle: 'medium' })
                 return (
                   <TableRow key={l.id}>
                     <TableCell>
-                      <Link href={`/crm/leads/${l.id}`} className="font-medium hover:underline">{l.lead_no}</Link>
-                      <div className="text-xs text-muted-foreground">{new Date(l.enquiry_date).toLocaleDateString('en-IN')}</div>
+                      <Link href={`/crm/leads/${l.id}`} className="font-medium hover:underline">{l.guest_name}</Link>
+                      <div className="text-xs text-muted-foreground">{l.phone} · {l.lead_no}</div>
                     </TableCell>
                     <TableCell>
-                      {l.guest_name}
-                      <div className="text-xs text-muted-foreground">{l.phone}</div>
+                      {(l.services as string[]).map((s) => label(LEAD_SERVICES, s)).join(', ') || '—'}
+                      <div className="text-xs text-muted-foreground">
+                        {[when, l.start_place && `from ${l.start_place}`, `${pax} ${pax === 1 ? 'person' : 'people'}`].filter(Boolean).join(' · ')}
+                      </div>
                     </TableCell>
-                    <TableCell>
-                      {l.travel_date_open ? 'Open' : l.travel_date && new Date(l.travel_date).toLocaleDateString('en-IN')}
-                      {l.start_place && <div className="text-xs text-muted-foreground">from {l.start_place}</div>}
+                    <TableCell className={overdue ? 'text-destructive' : undefined}>
+                      {l.next_followup_at ? istDateTime(l.next_followup_at) : '—'}
+                      {overdue && <div className="text-xs">Overdue</div>}
                     </TableCell>
-                    <TableCell className="max-w-40 truncate">{(l.services as string[]).map((s) => label(LEAD_SERVICES, s)).join(', ')}</TableCell>
-                    <TableCell className="text-right tabular-nums">{l.adults + l.children_above_12 + l.children_6_12 + l.infants}</TableCell>
-                    <TableCell className={overdue ? 'text-destructive' : undefined}>{l.next_followup_at ? istDateTime(l.next_followup_at) : '—'}</TableCell>
                     <TableCell><Badge variant={statusTone(l.status)}>{label(LEAD_STATUSES, l.status)}</Badge></TableCell>
-                    <TableCell>{(l.org_members as unknown as { display_name: string } | null)?.display_name}</TableCell>
                   </TableRow>
                 )
               })}
@@ -131,7 +152,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           </Table>
         </div>
       ) : (
-        <EmptyState>No leads match. Create one with “New lead”.</EmptyState>
+        <EmptyState>{filtered ? 'No leads found here.' : 'No leads yet. Add your first one with “+ New lead”.'}</EmptyState>
       )}
     </>
   )

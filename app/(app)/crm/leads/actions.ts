@@ -12,8 +12,7 @@ import type { FormState } from '@/components/form'
 const opt = z.string().trim().transform((v) => (v === '' ? null : v))
 const count = z.coerce.number().int().min(0).max(99)
 
-const Schema = z
-  .object({
+const Schema = z.object({
     id: opt,
     guest_name: z.string().trim().min(2, 'Enter the guest name'),
     phone: z.string().trim().min(6, 'Enter a phone number'),
@@ -21,7 +20,6 @@ const Schema = z
     party_ledger_id: opt,
     start_place: opt,
     travel_date: opt,
-    travel_date_open: z.preprocess((v) => v === 'on', z.boolean()),
     adults: z.coerce.number().int().min(1, 'At least one adult').max(99),
     children_above_12: count,
     children_6_12: count,
@@ -35,8 +33,7 @@ const Schema = z
     followup_action: opt,
     followup_date: opt,
     followup_slot: opt,
-  })
-  .refine((d) => d.travel_date || d.travel_date_open, { message: 'Pick a travel date or tick “date is open”' })
+})
 
 export async function saveLead(_: FormState, form: FormData): Promise<FormState> {
   const parsed = Schema.safeParse(Object.fromEntries(form))
@@ -51,6 +48,8 @@ export async function saveLead(_: FormState, form: FormData): Promise<FormState>
 
   const payload = {
     ...d,
+    // No travel date yet simply means the date is still open.
+    travel_date_open: !d.travel_date,
     ...(d.id ? {} : { enquiry_date: todayIST() }),
     services: form.getAll('services').map(String),
     budget: d.budget ? toPaise(d.budget) : null,

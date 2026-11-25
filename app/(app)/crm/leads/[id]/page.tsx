@@ -10,16 +10,24 @@ import { formatINR } from '@/lib/money'
 import { LeadForm, type LeadRow } from '../lead-form'
 import { getMembers, getParties } from '../data'
 import { completeFollowup } from '../actions'
+import { FlightOptions, type SavedOption } from '../flight-options'
+import { airportCode } from '@/lib/flights'
 
 export const metadata = { title: 'Lead' }
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { supabase, org } = await getContext()
-  const [{ data: lead }, { data: followups }, { data: invoices }] = await Promise.all([
+  const [{ data: lead }, { data: followups }, { data: invoices }, { data: flights }] = await Promise.all([
     supabase.from('leads').select('*').eq('org_id', org.id).eq('id', id).maybeSingle(),
     supabase.from('lead_followups').select('id, action, due_at, done_at, outcome').eq('lead_id', id).order('due_at', { ascending: false }),
     supabase.from('invoices').select('id, invoice_no, invoice_date, total').eq('lead_id', id).order('invoice_date'),
+    supabase
+      .from('lead_flight_options')
+      .select('id, airline, flight_no, from_code, to_code, travel_date, depart_time, arrive_time, price')
+      .eq('lead_id', id)
+      .order('travel_date')
+      .order('depart_time'),
   ])
   if (!lead) notFound()
 
@@ -31,10 +39,20 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         actions={
           <>
             <Badge variant={statusTone(lead.status)}>{label(LEAD_STATUSES, lead.status)}</Badge>
-            <LinkButton href={`/crm/quotations/new?lead=${lead.id}`} variant="outline">Create quotation</LinkButton>
-            <LinkButton href={`/billing/invoices/new?lead=${lead.id}`}>Create invoice</LinkButton>
+            <LinkButton href={`/crm/quotations/new?lead=${lead.id}`} variant="outline">Make quotation</LinkButton>
+            <LinkButton href={`/billing/invoices/new?lead=${lead.id}`}>Make invoice</LinkButton>
           </>
         }
+      />
+
+      <FlightOptions
+        leadId={lead.id}
+        guest={lead.guest_name}
+        phone={lead.phone}
+        company={org.name}
+        saved={(flights ?? []) as SavedOption[]}
+        from={airportCode(lead.start_place)}
+        date={lead.travel_date}
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -63,7 +81,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
                       <form action={completeFollowup} className="mt-2 flex gap-2">
                         <input type="hidden" name="id" value={f.id} />
                         <input type="hidden" name="lead_id" value={lead.id} />
-                        <Input name="outcome" placeholder="Outcome (optional)" className="h-7 text-xs" />
+                        <Input name="outcome" placeholder="What happened? (optional)" className="h-7 text-xs" />
                         <Button type="submit" size="sm" variant="outline">Done</Button>
                       </form>
                     )}
